@@ -1,17 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  motion,
-  AnimatePresence,
-  useScroll,
-  useTransform,
-  useInView,
-  useMotionValue,
-  useReducedMotion,
-  animate,
-  type Variants,
-} from "motion/react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const NAV = [
   { label: "브랜드", href: "#brand" },
@@ -37,50 +32,157 @@ const COLLECTIONS = [
   { name: "로우 리무진", tag: "LOW", desc: "도심형 프로파일의 컴팩트 커스텀 리무진." },
 ];
 
+const FEATURES = [
+  { t: "빌트인 PC", d: "차량에 내장된 고성능 컴퓨팅 시스템." },
+  { t: "앱 컨트롤", d: "전용 애플리케이션으로 실내 환경을 제어." },
+  { t: "통합 컨트롤", d: "조명 · 사운드 · 디스플레이를 하나의 인터페이스로." },
+  { t: "몰입형 사운드", d: "공간 전체를 감싸는 프리미엄 오디오 설계." },
+];
+
 const GALLERY = Array.from({ length: 8 }, (_, i) => `VIDEO ${String(i + 1).padStart(2, "0")}`);
-const PRESS = ["PRESS A", "PRESS B", "PRESS C", "PRESS D", "PRESS E", "PRESS F"];
+const PRESS = ["PRESS A", "PRESS B", "PRESS C", "PRESS D", "PRESS E", "PRESS F", "PRESS G", "PRESS H"];
 const STATS = [
   { n: 18, l: "인증 보유" },
   { n: 3, l: "ISO 표준" },
   { n: 1, l: "OEM 파트너십" },
 ];
 
-/* ── Shared reveal variants ── */
-const reveal: Variants = {
-  hidden: { opacity: 0, y: 28 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
-};
-const stagger: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.12 } },
-};
-
 export default function Home() {
+  const root = useRef<HTMLDivElement>(null);
   const [slide, setSlide] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const reduce = useReducedMotion();
 
-  const { scrollY } = useScroll();
-  const headerBg = useTransform(scrollY, [0, 120], ["rgba(10,10,11,0)", "rgba(10,10,11,0.72)"]);
-  const headerBorder = useTransform(scrollY, [0, 120], ["rgba(255,255,255,0)", "rgba(255,255,255,0.1)"]);
-  const heroY = useTransform(scrollY, [0, 600], [0, reduce ? 0 : 140]);
-
+  /* Hero auto-rotate */
   useEffect(() => {
     const t = setInterval(() => setSlide((s) => (s + 1) % HERO_SLIDES.length), 4500);
     return () => clearInterval(t);
   }, []);
 
+  /* Header state on scroll */
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 80);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  /* ── GSAP ScrollTrigger interactions ── */
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+
+      mm.add(
+        {
+          isReduced: "(prefers-reduced-motion: reduce)",
+          isOk: "(prefers-reduced-motion: no-preference)",
+        },
+        (ctx) => {
+          const conditions = ctx.conditions as { isReduced: boolean; isOk: boolean };
+
+          // Reduced motion: reveal everything, snap counters to final.
+          if (conditions.isReduced) {
+            gsap.set("[data-reveal]", { opacity: 1, y: 0 });
+            gsap.set("[data-clip]", { clipPath: "inset(0 0% 0 0)" });
+            document.querySelectorAll<HTMLElement>("[data-counter]").forEach((el) => {
+              el.textContent = el.dataset.to ?? "";
+            });
+            return;
+          }
+
+          // Staggered scroll reveals (grouped)
+          gsap.utils.toArray<HTMLElement>("[data-reveal-group]").forEach((group) => {
+            const items = group.querySelectorAll("[data-reveal]");
+            gsap.from(items, {
+              y: 44,
+              opacity: 0,
+              duration: 0.9,
+              ease: "power3.out",
+              stagger: 0.12,
+              scrollTrigger: { trigger: group, start: "top 82%" },
+            });
+          });
+
+          // Solo reveals
+          gsap.utils.toArray<HTMLElement>("[data-reveal-solo]").forEach((el) => {
+            gsap.from(el, {
+              y: 44,
+              opacity: 0,
+              duration: 0.9,
+              ease: "power3.out",
+              scrollTrigger: { trigger: el, start: "top 85%" },
+            });
+          });
+
+          // Scrubbed parallax on media blocks
+          gsap.utils.toArray<HTMLElement>("[data-parallax]").forEach((el) => {
+            gsap.fromTo(
+              el,
+              { yPercent: -8 },
+              {
+                yPercent: 8,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: el.parentElement,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: true,
+                },
+              }
+            );
+          });
+
+          // clip-path wipe reveal
+          gsap.utils.toArray<HTMLElement>("[data-clip]").forEach((el) => {
+            gsap.from(el, {
+              clipPath: "inset(0 100% 0 0)",
+              duration: 1.2,
+              ease: "power3.inOut",
+              scrollTrigger: { trigger: el, start: "top 80%" },
+            });
+          });
+
+          // Animated counters
+          gsap.utils.toArray<HTMLElement>("[data-counter]").forEach((el) => {
+            const to = Number(el.dataset.to ?? 0);
+            const obj = { v: 0 };
+            ScrollTrigger.create({
+              trigger: el,
+              start: "top 88%",
+              once: true,
+              onEnter: () =>
+                gsap.to(obj, {
+                  v: to,
+                  duration: 1.6,
+                  ease: "power2.out",
+                  onUpdate: () => (el.textContent = String(Math.round(obj.v))),
+                }),
+            });
+          });
+
+          // Infinite marquee
+          gsap.utils.toArray<HTMLElement>("[data-marquee]").forEach((track) => {
+            gsap.to(track, { xPercent: -50, repeat: -1, duration: 22, ease: "none" });
+          });
+        }
+      );
+    },
+    { scope: root }
+  );
+
   return (
-    <div className="min-h-screen w-full">
+    <div ref={root} className="min-h-screen w-full">
       {/* ── Header ── */}
-      <motion.header
-        style={{ backgroundColor: headerBg, borderColor: headerBorder }}
-        className="fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md"
+      <header
+        className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md transition-colors duration-500 ${
+          scrolled ? "border-white/10 bg-[#0a0a0b]/80" : "border-transparent bg-transparent"
+        }`}
       >
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
           <nav className="hidden flex-1 items-center gap-7 text-sm text-zinc-300 lg:flex">
             {NAV.slice(0, 3).map((n) => (
-              <a key={n.href} href={n.href} className="relative transition-colors hover:text-white">
+              <a key={n.href} href={n.href} className="nav-link">
                 {n.label}
               </a>
             ))}
@@ -93,7 +195,7 @@ export default function Home() {
           <div className="flex flex-1 items-center justify-end gap-7 text-sm text-zinc-300">
             <div className="hidden items-center gap-7 lg:flex">
               {NAV.slice(3).map((n) => (
-                <a key={n.href} href={n.href} className="transition-colors hover:text-white">
+                <a key={n.href} href={n.href} className="nav-link">
                   {n.label}
                 </a>
               ))}
@@ -104,7 +206,6 @@ export default function Home() {
             >
               상담 신청
             </a>
-            {/* Mobile hamburger */}
             <button
               aria-label="메뉴 열기"
               onClick={() => setMenuOpen(true)}
@@ -116,7 +217,7 @@ export default function Home() {
             </button>
           </div>
         </div>
-      </motion.header>
+      </header>
 
       {/* ── Mobile drawer ── */}
       <AnimatePresence>
@@ -170,54 +271,57 @@ export default function Home() {
       <main id="top">
         {/* ── Hero carousel ── */}
         <section className="relative h-screen w-full overflow-hidden">
-          <motion.div style={{ y: heroY }} className="absolute inset-0">
-            {HERO_SLIDES.map((label, i) => (
-              <motion.div
-                key={label}
-                data-label={label}
-                className="ph absolute inset-0"
-                animate={
-                  i === slide
-                    ? { opacity: 1, scale: reduce ? 1 : 1.08 }
-                    : { opacity: 0, scale: 1 }
-                }
-                transition={{
-                  opacity: { duration: 1.2, ease: "easeInOut" },
-                  scale: { duration: 6, ease: "linear" },
-                }}
-              />
-            ))}
-          </motion.div>
+          {HERO_SLIDES.map((label, i) => (
+            <motion.div
+              key={label}
+              data-label={label}
+              className="ph absolute inset-0"
+              animate={i === slide ? { opacity: 1, scale: reduce ? 1 : 1.1 } : { opacity: 0, scale: 1 }}
+              transition={{
+                opacity: { duration: 1.2, ease: "easeInOut" },
+                scale: { duration: 6, ease: "linear" },
+              }}
+            />
+          ))}
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/85" />
 
           <motion.div
             initial="hidden"
             animate="show"
-            variants={stagger}
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.14, delayChildren: 0.2 } } }}
             className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center"
           >
-            <motion.p variants={reveal} className="mb-4 text-xs tracking-[0.4em] text-zinc-400">
-              LUXURY CUSTOM MOBILITY
-            </motion.p>
-            <motion.h1 variants={reveal} className="max-w-3xl text-4xl font-semibold leading-tight sm:text-6xl">
-              당신을 위한
-              <br />
-              단 하나의 모빌리티
-            </motion.h1>
-            <motion.div variants={reveal} className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <a
-                href="#builder"
-                className="rounded-full bg-white px-8 py-3 text-sm font-semibold text-black transition-colors hover:bg-zinc-200"
+            {[
+              <p key="e" className="mb-4 text-xs tracking-[0.4em] text-zinc-400">
+                LUXURY CUSTOM MOBILITY
+              </p>,
+              <h1 key="h" className="max-w-3xl text-4xl font-semibold leading-tight sm:text-6xl">
+                당신을 위한
+                <br />
+                단 하나의 모빌리티
+              </h1>,
+              <div key="c" className="mt-10 flex flex-col gap-4 sm:flex-row">
+                <a
+                  href="#builder"
+                  className="rounded-full bg-white px-8 py-3 text-sm font-semibold text-black transition-colors hover:bg-zinc-200"
+                >
+                  커스텀 시작하기
+                </a>
+                <a
+                  href="#models"
+                  className="rounded-full border border-white/30 px-8 py-3 text-sm font-semibold transition-colors hover:bg-white/10"
+                >
+                  모델 살펴보기
+                </a>
+              </div>,
+            ].map((el, i) => (
+              <motion.div
+                key={i}
+                variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.7 } } }}
               >
-                커스텀 시작하기
-              </a>
-              <a
-                href="#models"
-                className="rounded-full border border-white/30 px-8 py-3 text-sm font-semibold transition-colors hover:bg-white/10"
-              >
-                모델 살펴보기
-              </a>
-            </motion.div>
+                {el}
+              </motion.div>
+            ))}
           </motion.div>
 
           <div className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 gap-2">
@@ -234,42 +338,35 @@ export default function Home() {
 
         {/* ── Why KS ── */}
         <Section id="brand" eyebrow="WHY KS MOBILITY" title="선택받는 이유">
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-80px" }}
+          <div
+            data-reveal-group
             className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-4"
           >
             {PILLARS.map((p) => (
-              <motion.div variants={reveal} key={p.no} className="bg-[#0e0e10] p-8">
+              <div data-reveal key={p.no} className="bg-[#0e0e10] p-8">
                 <div className="font-mono text-sm text-zinc-500">{p.no}</div>
                 <h3 className="mt-6 text-lg font-semibold">{p.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-zinc-400">{p.desc}</p>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </Section>
 
         {/* ── Collections ── */}
         <Section id="models" eyebrow="PRODUCT COLLECTIONS" title="라인업">
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-80px" }}
-            className="grid grid-cols-1 gap-6 lg:grid-cols-3"
-          >
+          <div data-reveal-group className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             {COLLECTIONS.map((c) => (
-              <motion.a
-                variants={reveal}
-                whileHover={{ y: -6 }}
+              <a
+                data-reveal
                 key={c.name}
                 href="#consult"
                 className="group overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e10] transition-colors hover:border-white/25"
               >
                 <div className="aspect-[4/3] w-full overflow-hidden">
-                  <div data-label={c.tag} className="ph h-full w-full transition-transform duration-700 group-hover:scale-110" />
+                  <div
+                    data-label={c.tag}
+                    className="ph h-full w-full transition-transform duration-700 group-hover:scale-110"
+                  />
                 </div>
                 <div className="p-6">
                   <div className="text-xs tracking-[0.2em] text-zinc-500">{c.tag}</div>
@@ -279,53 +376,37 @@ export default function Home() {
                     자세히 보기 →
                   </span>
                 </div>
-              </motion.a>
+              </a>
             ))}
-          </motion.div>
+          </div>
         </Section>
 
-        {/* ── Feature showcase ── */}
+        {/* ── Feature showcase (sticky pin + clip reveal) ── */}
         <Section id="builder" eyebrow='55" DIGITAL SKY VIEW' title="공간을 완성하는 기술">
-          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
-            <motion.div
-              variants={reveal}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: "-80px" }}
-              data-label="FEATURE SHOWCASE"
-              className="ph aspect-video w-full rounded-2xl"
-            />
-            <motion.div
-              variants={stagger}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: "-80px" }}
-              className="space-y-6"
-            >
-              {[
-                { t: "빌트인 PC", d: "차량에 내장된 고성능 컴퓨팅 시스템." },
-                { t: "앱 컨트롤", d: "전용 애플리케이션으로 실내 환경을 제어." },
-                { t: "통합 컨트롤", d: "조명 · 사운드 · 디스플레이를 하나의 인터페이스로." },
-              ].map((f) => (
-                <motion.div variants={reveal} key={f.t} className="border-l-2 border-white/20 pl-5">
-                  <h3 className="text-lg font-semibold">{f.t}</h3>
-                  <p className="mt-1 text-sm text-zinc-400">{f.d}</p>
-                </motion.div>
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
+            <div className="lg:sticky lg:top-28 lg:h-fit">
+              <div data-clip className="ph aspect-[4/5] w-full overflow-hidden rounded-2xl">
+                <div data-parallax data-label="FEATURE SHOWCASE" className="ph absolute inset-0 scale-110" />
+              </div>
+            </div>
+            <div data-reveal-group className="flex flex-col gap-10 py-4">
+              {FEATURES.map((f, i) => (
+                <div data-reveal key={f.t} className="border-l-2 border-white/20 pl-6">
+                  <div className="font-mono text-sm text-zinc-500">{String(i + 1).padStart(2, "0")}</div>
+                  <h3 className="mt-3 text-2xl font-semibold">{f.t}</h3>
+                  <p className="mt-2 text-zinc-400">{f.d}</p>
+                </div>
               ))}
-            </motion.div>
+            </div>
           </div>
         </Section>
 
         {/* ── Craft / video ── */}
         <Section id="craft" eyebrow="THE CRAFT" title="제작 과정">
-          <motion.div
-            variants={reveal}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-80px" }}
-            className="relative overflow-hidden rounded-2xl border border-white/10"
-          >
-            <div data-label="CRAFT VIDEO" className="ph aspect-[21/9] w-full" />
+          <div data-reveal-solo className="relative overflow-hidden rounded-2xl border border-white/10">
+            <div className="aspect-[21/9] w-full overflow-hidden">
+              <div data-parallax data-label="CRAFT VIDEO" className="ph absolute inset-0 scale-110" />
+            </div>
             <motion.button
               aria-label="영상 재생"
               whileHover={{ scale: 1.08 }}
@@ -334,82 +415,50 @@ export default function Home() {
             >
               <span className="ml-1 text-xl">▶</span>
             </motion.button>
-          </motion.div>
+          </div>
         </Section>
 
         {/* ── Media gallery ── */}
         <Section id="gallery" eyebrow="MEDIA GALLERY" title="갤러리">
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-80px" }}
-            className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4"
-          >
+          <div data-reveal-group className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {GALLERY.map((g) => (
-              <motion.div
-                variants={reveal}
-                whileHover={{ scale: 1.03 }}
-                key={g}
-                data-label={g}
-                className="ph aspect-video w-full rounded-xl"
-              />
+              <div data-reveal key={g} className="aspect-video w-full overflow-hidden rounded-xl">
+                <div data-label={g} className="ph h-full w-full transition-transform duration-700 hover:scale-110" />
+              </div>
             ))}
-          </motion.div>
+          </div>
         </Section>
 
-        {/* ── Press ── */}
+        {/* ── Press (marquee) ── */}
         <Section id="press" eyebrow="PRESS COVERAGE" title="언론 보도">
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-80px" }}
-            className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-3 lg:grid-cols-6"
-          >
-            {PRESS.map((p) => (
-              <motion.div
-                variants={reveal}
-                key={p}
-                className="flex h-24 items-center justify-center bg-[#0e0e10] text-xs tracking-widest text-zinc-500"
-              >
-                {p}
-              </motion.div>
-            ))}
-          </motion.div>
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e10] py-10">
+            <div data-marquee className="flex w-max gap-16 px-8">
+              {[...PRESS, ...PRESS].map((p, i) => (
+                <span key={i} className="whitespace-nowrap text-lg tracking-widest text-zinc-500">
+                  {p}
+                </span>
+              ))}
+            </div>
+          </div>
         </Section>
 
-        {/* ── Certifications ── */}
+        {/* ── Certifications (counters) ── */}
         <Section id="support" eyebrow="CERTIFICATIONS" title="인증 및 파트너십">
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-80px" }}
-            className="grid grid-cols-1 gap-6 sm:grid-cols-3"
-          >
+          <div data-reveal-group className="grid grid-cols-1 gap-6 sm:grid-cols-3">
             {STATS.map((s) => (
-              <motion.div
-                variants={reveal}
-                key={s.l}
-                className="rounded-2xl border border-white/10 bg-[#0e0e10] p-10 text-center"
-              >
-                <Counter to={s.n} reduce={!!reduce} />
+              <div data-reveal key={s.l} className="rounded-2xl border border-white/10 bg-[#0e0e10] p-10 text-center">
+                <div data-counter data-to={s.n} className="text-5xl font-semibold tabular-nums">
+                  0
+                </div>
                 <div className="mt-3 text-sm tracking-wider text-zinc-400">{s.l}</div>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </Section>
 
         {/* ── Final CTA ── */}
         <section id="consult" className="border-y border-white/10 bg-[#0e0e10]">
-          <motion.div
-            variants={reveal}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-80px" }}
-            className="mx-auto max-w-4xl px-6 py-24 text-center"
-          >
+          <div data-reveal-solo className="mx-auto max-w-4xl px-6 py-24 text-center">
             <h2 className="text-3xl font-semibold sm:text-4xl">지금, 당신의 모빌리티를 시작하세요</h2>
             <p className="mx-auto mt-4 max-w-xl text-zinc-400">전담 컨시어지가 상담부터 출고까지 함께합니다.</p>
             <motion.a
@@ -420,7 +469,7 @@ export default function Home() {
             >
               상담 신청하기
             </motion.a>
-          </motion.div>
+          </div>
         </section>
       </main>
 
@@ -462,35 +511,7 @@ export default function Home() {
   );
 }
 
-/* ── Count-up number ── */
-function Counter({ to, reduce }: { to: number; reduce: boolean }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
-  const count = useMotionValue(0);
-  const [display, setDisplay] = useState(0);
-
-  useEffect(() => {
-    if (!inView) return;
-    if (reduce) {
-      setDisplay(to);
-      return;
-    }
-    const controls = animate(count, to, {
-      duration: 1.4,
-      ease: [0.22, 1, 0.36, 1],
-      onUpdate: (v) => setDisplay(Math.round(v)),
-    });
-    return () => controls.stop();
-  }, [inView, to, reduce, count]);
-
-  return (
-    <div ref={ref} className="text-5xl font-semibold tabular-nums">
-      {display}
-    </div>
-  );
-}
-
-/* ── Section wrapper with heading reveal ── */
+/* ── Section wrapper ── */
 function Section({
   id,
   eyebrow,
@@ -504,20 +525,14 @@ function Section({
 }) {
   return (
     <section id={id} className="mx-auto max-w-7xl px-6 py-24">
-      <motion.div
-        variants={stagger}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, margin: "-80px" }}
-        className="mb-12"
-      >
-        <motion.p variants={reveal} className="text-xs tracking-[0.3em] text-zinc-500">
+      <div data-reveal-group className="mb-12">
+        <p data-reveal className="text-xs tracking-[0.3em] text-zinc-500">
           {eyebrow}
-        </motion.p>
-        <motion.h2 variants={reveal} className="mt-3 text-3xl font-semibold sm:text-4xl">
+        </p>
+        <h2 data-reveal className="mt-3 text-3xl font-semibold sm:text-4xl">
           {title}
-        </motion.h2>
-      </motion.div>
+        </h2>
+      </div>
       {children}
     </section>
   );
