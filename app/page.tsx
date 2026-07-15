@@ -18,19 +18,16 @@ const KAKAO = "https://open.kakao.com/o/s0xvjpBh";
 const INSTA = "#"; // TODO: 인스타그램 계정 확정 시 실제 링크로 교체
 const MAP_EMBED = `https://maps.google.com/maps?q=${encodeURIComponent(ADDRESS)}&z=16&output=embed`;
 
-/* 공지사항/블로그 (임시 placeholder — 콘텐츠 확정 시 교체) */
+/* 공지사항 / 블로그 (임시 placeholder — 콘텐츠 확정 시 교체) */
 const NOTICES = [
-  {
-    tag: "공지",
-    date: "2026.07.10",
-    title: "특장 카니발 신규 라인업 상담 예약 안내",
-  },
-  {
-    tag: "블로그",
-    date: "2026.06.28",
-    title: "특장 카니발 제작 과정, 이렇게 진행됩니다",
-  },
-  { tag: "공지", date: "2026.06.15", title: "여름 시즌 상담 운영 시간 안내" },
+  { date: "2026.07.10", title: "특장 카니발 신규 라인업 상담 예약 안내" },
+  { date: "2026.06.15", title: "여름 시즌 상담 운영 안내" },
+  { date: "2026.05.20", title: "5월 상담 예약 관련 공지" },
+];
+const BLOG = [
+  { date: "2026.06.28", title: "특장 카니발 제작 과정, 이렇게 진행됩니다" },
+  { date: "2026.06.05", title: "특장 카니발, 고를 때 체크할 5가지" },
+  { date: "2026.05.12", title: "내부 옵션 커스텀 어디까지 가능할까" },
 ];
 
 const HERO_SLIDES = [
@@ -54,13 +51,13 @@ const PRODUCTS = [
   { name: "스페셜 오더", tag: "BESPOKE" },
 ];
 
-/* Pinned scroll-sequence slides */
+/* 인스타그램 핀 스크롤 시퀀스 (첫 슬라이드 = 인스타그램) */
 const SEQ = [
-  { tag: '55" DIGITAL SKY VIEW', title: "디지털 스카이뷰" },
-  { tag: "BUILT-IN PC", title: "빌트인 PC" },
-  { tag: "APP CONTROL", title: "앱 컨트롤" },
-  { tag: "INTEGRATED CONTROL", title: "통합 컨트롤" },
-  { tag: "IMMERSIVE SOUND", title: "몰입형 사운드" },
+  { tag: "INSTAGRAM", title: "특장맨 인스타그램" },
+  { tag: "@특장맨", title: "작업 사례 01" },
+  { tag: "@특장맨", title: "작업 사례 02" },
+  { tag: "@특장맨", title: "작업 사례 03" },
+  { tag: "@특장맨", title: "작업 사례 04" },
 ];
 
 export default function Home() {
@@ -227,6 +224,35 @@ export default function Home() {
             });
           });
 
+          /* About: full-shot headline rises line-by-line (masked reveal) */
+          const about = document.querySelector<HTMLElement>("[data-about]");
+          if (about) {
+            const tl = gsap.timeline({
+              scrollTrigger: { trigger: about, start: "top 78%" },
+            });
+            tl.from(about.querySelectorAll(".about-eyebrow"), {
+              opacity: 0,
+              y: 20,
+              duration: 0.6,
+              ease: "power2.out",
+            })
+              .from(
+                about.querySelectorAll<HTMLElement>(".about-line"),
+                {
+                  yPercent: 120,
+                  duration: 1,
+                  ease: "power4.out",
+                  stagger: 0.15,
+                },
+                "-=0.2",
+              )
+              .from(
+                about.querySelectorAll(".about-sub"),
+                { opacity: 0, y: 20, duration: 0.6, ease: "power2.out" },
+                "-=0.35",
+              );
+          }
+
           /* ── Pinned scroll sequence (image 5장 crossfade) ── */
           const seq = document.querySelector<HTMLElement>("[data-seq]");
           if (seq) {
@@ -328,6 +354,39 @@ export default function Home() {
         </div>
       </header>
 
+      {/* ── 우측 플로팅 액션 (스크롤 따라다님) ── */}
+      <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-3">
+        <a
+          href="#top"
+          aria-label="맨 위로"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/60 text-lg text-white backdrop-blur-sm transition-colors hover:bg-black/80"
+        >
+          ↑
+        </a>
+        <a
+          href={KAKAO}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="카카오톡 상담"
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FEE500] text-black shadow-lg transition-transform hover:scale-105"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            className="h-6 w-6"
+            fill="currentColor"
+            aria-hidden
+          >
+            <path d="M12 3C6.9 3 3 6.3 3 10.2c0 2.5 1.7 4.7 4.2 6-.2.6-.6 2.3-.7 2.6 0 .1 0 .3.2.3.1 0 .2 0 .3-.1.4-.3 2.4-1.6 3.3-2.2.5.1 1 .1 1.5.1 5.1 0 9-3.3 9-7.2S17.1 3 12 3z" />
+          </svg>
+        </a>
+        <a
+          href="#consult"
+          className="cta-wiggle rounded-full border border-white/40 bg-white/5 px-6 py-4 text-sm font-semibold text-white shadow-lg backdrop-blur-sm transition-colors hover:bg-white/15"
+        >
+          상담 신청
+        </a>
+      </div>
+
       <main id="top">
         {/* ── Hero carousel ── */}
         <section className="relative h-screen w-full overflow-hidden">
@@ -414,59 +473,62 @@ export default function Home() {
         </section>
 
         {/* ── 회사/브랜드 소개 ── */}
-        <Section id="about" eyebrow="ABOUT" title="브랜드 소개">
+        {/* ── 회사/브랜드 소개 (풀샷 배경 + 라인 리빌) ── */}
+        <section
+          id="about"
+          className="relative flex min-h-screen w-full items-center justify-center overflow-hidden"
+        >
+          {/* 배경: 실제 사진 넣기 전 스포트라이트 그라데이션 (사진 준비되면 이 블록 교체) */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_75%_60%_at_50%_38%,#2c2c34_0%,#16161b_48%,#0a0a0b_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(255,255,255,0.06),transparent_45%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70" />
+
           <div
-            data-reveal-group
-            className="mb-14 grid grid-cols-1 items-center gap-10 lg:grid-cols-2"
+            data-about
+            className="relative z-10 mx-auto max-w-5xl px-6 text-center"
           >
-            <div
-              data-reveal
-              className="group aspect-[4/3] w-full overflow-hidden rounded-2xl"
-            >
-              <div
-                data-parallax
-                className="ph h-[122%] w-full transition-transform duration-700 group-hover:scale-105"
-              />
-            </div>
-            <div>
-              <h3
-                data-reveal
-                className="text-2xl font-semibold leading-snug sm:text-3xl"
-              >
-                특장 카니발 전문, 특장맨
-              </h3>
-              <p data-reveal className="mt-5 leading-relaxed text-zinc-400">
-                {BRAND}은 카니발 기반의 특장·커스텀 제작을 전문으로 합니다.
-                <br />
-                꼼꼼한 설계와 시공, 그리고 출고 후까지 이어지는 관리로
-                <br />
-                고객 한 분 한 분께 신뢰를 드립니다.
-              </p>
-              <p data-reveal className="mt-4 leading-relaxed text-zinc-400">
-                상담부터 제작, 인도까지 전 과정을 직접 챙깁니다.
-                <br />
-                원하시는 사양을 편하게 문의해 주세요.
-              </p>
-              <div data-reveal className="mt-8 flex flex-wrap gap-3 text-sm">
-                <a
-                  href="#consult"
-                  className="rounded-full bg-white px-6 py-2.5 font-semibold text-black transition-colors hover:bg-zinc-200"
-                >
-                  상담 문의
-                </a>
-                <a
-                  href={`tel:${PHONE_TEL}`}
-                  className="rounded-full border border-white/25 px-6 py-2.5 transition-colors hover:bg-white/10"
-                >
-                  전화 문의
-                </a>
-              </div>
-            </div>
+            <p className="about-eyebrow mb-6 text-xs tracking-[0.35em] text-zinc-300 sm:text-sm">
+              CARNIVAL SPECIAL VEHICLE · INCHEON
+            </p>
+            <h2 className="text-4xl font-bold leading-[1.18] sm:text-6xl">
+              {["카니발을 특별하게", "특장맨의 손끝에서", "완성됩니다"].map(
+                (line) => (
+                  <span key={line} className="block overflow-hidden pb-1">
+                    <span className="about-line block">{line}</span>
+                  </span>
+                ),
+              )}
+            </h2>
+            <p className="about-sub mt-10 leading-relaxed text-zinc-300">
+              상담부터 인도, 사후관리까지 전 과정을 함께합니다.
+            </p>
           </div>
-        </Section>
+        </section>
+
+        {/* ── 상담 유도 배너 (라인업 위) ── */}
+        <div className="mx-auto max-w-7xl px-6 pt-24">
+          <div
+            data-reveal-solo
+            className="flex flex-col items-start gap-6 rounded-2xl bg-white px-8 py-8 text-black sm:flex-row sm:items-center sm:justify-between sm:px-10"
+          >
+            <p className="text-sm leading-relaxed sm:text-base">
+              <span className="font-semibold">
+                전문 상담원이 1:1로 안내해 드립니다.
+              </span>{" "}
+              원하시는 사양과 예산에 맞춰, 특장맨이 꼼꼼하게 안내해
+              드리겠습니다.
+            </p>
+            <a
+              href="#consult"
+              className="inline-flex shrink-0 items-center gap-2 rounded-full bg-black px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-zinc-800"
+            >
+              상담 신청 <span aria-hidden>→</span>
+            </a>
+          </div>
+        </div>
 
         {/* ── Lineup — expanding accordion (8 products; hover grows the panel) ── */}
-        <section id="models" className="py-24">
+        <section id="models" className="pb-24 pt-16">
           <div className="mx-auto max-w-7xl px-6">
             <div data-reveal-group className="mb-12">
               <p data-reveal className="text-xs tracking-[0.3em] text-zinc-500">
@@ -533,20 +595,20 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Feature — pinned scroll sequence (5 slides crossfade) ── */}
-        <section id="builder" data-seq className="relative w-full">
+        {/* ── 인스타그램 (핀 스크롤 시퀀스 · 첫 슬라이드 = 인스타그램) ── */}
+        <section id="instagram" data-seq className="relative w-full">
           <div
             data-seq-pin
             className="relative flex h-screen w-full items-center justify-center overflow-hidden"
           >
             {SEQ.map((s, i) => (
               <div
-                key={s.tag}
+                key={s.title}
                 data-seq-img
                 className={`ph absolute inset-0 ${i === 0 ? "opacity-100" : "opacity-0"}`}
               >
-                <div className="absolute inset-0 bg-black/45" />
-                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 text-center">
+                <div className="absolute inset-0 bg-black/50" />
+                <div className="absolute bottom-28 left-1/2 -translate-x-1/2 px-6 text-center">
                   <div className="text-xs tracking-[0.35em] text-zinc-300">
                     {s.tag}
                   </div>
@@ -561,7 +623,7 @@ export default function Home() {
             <div className="absolute right-6 top-1/2 flex -translate-y-1/2 flex-col items-center gap-3 sm:right-10">
               {SEQ.map((s, i) => (
                 <span
-                  key={s.tag}
+                  key={s.title}
                   data-seq-dot
                   className="w-1.5 rounded-full transition-all duration-300"
                   style={{
@@ -572,7 +634,15 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[11px] tracking-[0.3em] text-zinc-500">
+            {/* 팔로우 버튼 (항상 최상단, 클릭 가능) */}
+            <a
+              href={INSTA}
+              className="absolute bottom-12 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/40 bg-white/5 px-6 py-3 text-sm font-semibold backdrop-blur-sm transition-colors hover:bg-white/15"
+            >
+              인스타그램 팔로우 →
+            </a>
+
+            <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 text-[11px] tracking-[0.3em] text-zinc-500">
               SCROLL ↓
             </div>
           </div>
@@ -601,56 +671,48 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── 인스타그램 (신뢰) ── */}
-        <Section id="instagram" eyebrow="INSTAGRAM" title="인스타그램">
-          <div>
-            <p data-reveal-solo className="mb-8 max-w-xl text-zinc-400">
-              작업 과정과 실제 시공 사례를 인스타그램에서 확인하실 수 있습니다.
-            </p>
-            <div data-reveal-group className="grid grid-cols-3 gap-3 sm:gap-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <a
-                  data-reveal
-                  key={i}
-                  href={INSTA}
-                  className="aspect-square overflow-hidden rounded-xl"
-                >
-                  <div className="ph h-full w-full transition-transform duration-500 hover:scale-110" />
-                </a>
-              ))}
-            </div>
-            <div data-reveal-solo className="mt-8">
-              <a
-                href={INSTA}
-                className="inline-block rounded-full border border-white/25 px-6 py-2.5 text-sm transition-colors hover:bg-white/10"
-              >
-                인스타그램 팔로우 →
-              </a>
-            </div>
-          </div>
-        </Section>
-
-        {/* ── 공지사항 / 블로그 ── */}
+        {/* ── 공지사항 / 블로그 (2열) ── */}
         <Section id="notice" eyebrow="NEWS & BLOG" title="공지사항 · 블로그">
           <div
             data-reveal-group
-            className="divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e10]"
+            className="grid grid-cols-1 gap-6 lg:grid-cols-2"
           >
-            {NOTICES.map((n) => (
-              <a
+            {[
+              { heading: "공지사항", items: NOTICES },
+              { heading: "블로그", items: BLOG },
+            ].map((col) => (
+              <div
                 data-reveal
-                key={n.title}
-                href="#"
-                className="flex items-center gap-4 p-6 transition-colors hover:bg-white/5"
+                key={col.heading}
+                className="overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e10]"
               >
-                <span className="w-14 shrink-0 rounded-full border border-white/20 py-1 text-center text-xs text-zinc-400">
-                  {n.tag}
-                </span>
-                <span className="flex-1 truncate font-medium">{n.title}</span>
-                <span className="hidden shrink-0 text-sm text-zinc-500 sm:block">
-                  {n.date}
-                </span>
-              </a>
+                <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
+                  <h3 className="text-lg font-semibold">{col.heading}</h3>
+                  <a
+                    href="#"
+                    className="text-xs text-zinc-500 transition-colors hover:text-zinc-300"
+                  >
+                    더보기 →
+                  </a>
+                </div>
+                <ul className="divide-y divide-white/5">
+                  {col.items.map((n) => (
+                    <li key={n.title}>
+                      <a
+                        href="#"
+                        className="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-white/5"
+                      >
+                        <span className="flex-1 truncate text-sm font-medium">
+                          {n.title}
+                        </span>
+                        <span className="shrink-0 text-xs text-zinc-500">
+                          {n.date}
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </div>
         </Section>
@@ -699,15 +761,30 @@ export default function Home() {
         </Section>
 
         {/* ── 문의하기 ── */}
-        <section id="consult" className="border-y border-white/10 bg-[#0e0e10]">
-          <div data-reveal-solo className="mx-auto max-w-4xl px-6 py-24">
-            <div className="mb-10 text-center">
-              <p className="text-xs tracking-[0.3em] text-zinc-500">CONTACT</p>
-              <h2 className="mt-3 text-3xl font-semibold sm:text-4xl">
-                상담 · 문의하기
+        <section
+          id="consult"
+          className="relative overflow-hidden border-y border-white/10"
+        >
+          {/* 배경: 실제 사진 넣기 전 스포트라이트 그라데이션 (사진 준비되면 교체) */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_75%_65%_at_50%_35%,#2a2a31_0%,#141418_50%,#0a0a0b_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(255,255,255,0.05),transparent_45%)]" />
+
+          <div
+            data-reveal-solo
+            className="relative z-10 mx-auto max-w-4xl px-6 py-28"
+          >
+            <div className="mb-12 text-center">
+              <p className="text-xs tracking-[0.35em] text-zinc-400">
+                GET IN TOUCH
+              </p>
+              <h2 className="mt-5 text-4xl font-bold leading-tight sm:text-6xl">
+                특장 카니발이 처음이신가요?
+                <br />
+                무엇이든 편하게 물어보세요.
               </h2>
-              <p className="mx-auto mt-4 max-w-xl text-zinc-400">
-                아래 폼을 남겨주시거나, 카카오톡 · 전화로 편하게 문의해 주세요.
+              <p className="mx-auto mt-6 max-w-xl text-zinc-300">
+                카카오톡 · 전화 · 인스타그램, 또는 아래 폼으로 남겨주시면 빠르게
+                안내해 드리겠습니다.
               </p>
             </div>
 
@@ -756,94 +833,109 @@ export default function Home() {
               />
               <button
                 type="submit"
-                className="rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-black transition-colors hover:bg-zinc-200 sm:col-span-2"
+                className="mt-6 rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-black transition-colors hover:bg-zinc-200 sm:col-span-2"
               >
                 문의 남기기
               </button>
-              <p className="text-center text-xs text-zinc-600 sm:col-span-2">
+              {/* <p className="text-center text-xs text-zinc-600 sm:col-span-2">
                 * 현재는 폼 UI만 제공됩니다. 전송 기능은 관리자 페이지 구축 후
                 연동됩니다. 급하시면 카카오톡 · 전화로 문의해 주세요.
-              </p>
+              </p> */}
             </form>
           </div>
         </section>
       </main>
 
       {/* ── Footer ── */}
-      <footer className="bg-[#0a0a0b] px-6 py-16">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="lg:col-span-2">
-            <div className="text-lg font-semibold tracking-[0.15em]">
-              특장카니발 <span className="text-zinc-500">특장맨</span>
+      <footer className="border-t border-white/10 bg-[#0a0a0b] px-6 py-16">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
+            {/* left: brand + business info */}
+            <div>
+              <div className="text-lg font-semibold tracking-[0.15em]">
+                특장카니발 <span className="text-zinc-500">특장맨</span>
+              </div>
+              <p className="mt-4 text-sm leading-relaxed text-zinc-500">
+                카니발 기반 특장 · 커스텀 제작 전문.
+                <br />
+                상담 및 문의는 아래 연락처로 편하게 남겨주세요.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500">
+                <span>상호명 : {BRAND}</span>
+                <span className="text-white/15">|</span>
+                <span>주소 : {ADDRESS}</span>
+                {/* TODO: 대표자명 · 사업자등록번호 확정 시 추가 */}
+              </div>
             </div>
-            <p className="mt-4 text-sm leading-relaxed text-zinc-500">
-              카니발 기반 특장 · 커스텀 제작 전문.
-              <br />
-              상담 및 문의는 아래 연락처로 편하게 남겨주세요.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3 text-sm">
+
+            {/* right: social icons */}
+            <div className="flex items-center gap-3">
+              <a
+                href={INSTA}
+                aria-label="인스타그램"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  className="h-5 w-5"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="5" />
+                  <circle cx="12" cy="12" r="4" />
+                  <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                </svg>
+              </a>
               <a
                 href={KAKAO}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full border border-white/20 px-4 py-2 text-zinc-300 transition-colors hover:bg-white/10"
+                aria-label="카카오톡"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
               >
-                카카오톡
-              </a>
-              <a
-                href={INSTA}
-                className="rounded-full border border-white/20 px-4 py-2 text-zinc-300 transition-colors hover:bg-white/10"
-              >
-                인스타그램
+                <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+                  <path d="M12 4C7.3 4 3.5 7 3.5 10.7c0 2.3 1.6 4.4 4 5.6-.2.6-.6 2.1-.7 2.4 0 .2.1.3.3.2.2-.1 2.2-1.5 3-2 .6.1 1.2.1 1.9.1 4.7 0 8.5-3 8.5-6.7S16.7 4 12 4z" />
+                </svg>
               </a>
               <a
                 href={`tel:${PHONE_TEL}`}
-                className="rounded-full border border-white/20 px-4 py-2 text-zinc-300 transition-colors hover:bg-white/10"
+                aria-label="전화"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
               >
-                전화
+                <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+                  <path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.3 21 3 13.7 3 4c0-.6.4-1 1-1h3.4c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.3 1L6.6 10.8z" />
+                </svg>
               </a>
             </div>
           </div>
 
-          <div>
-            <div className="text-sm font-semibold text-zinc-300">바로가기</div>
-            <ul className="mt-4 space-y-2 text-sm text-zinc-500">
-              {[
-                { l: "브랜드 소개", href: "#about" },
-                { l: "라인업", href: "#models" },
-                { l: "공지 · 블로그", href: "#notice" },
-                { l: "오시는 길", href: "#location" },
-                { l: "문의하기", href: "#consult" },
-              ].map((it) => (
-                <li key={it.l}>
-                  <a
-                    href={it.href}
-                    className="transition-colors hover:text-zinc-300"
-                  >
-                    {it.l}
-                  </a>
-                </li>
-              ))}
-            </ul>
+          {/* bottom: links + copyright */}
+          <div className="mt-12 border-t border-white/10 pt-8 text-center">
+            <nav className="flex flex-wrap justify-center gap-6 text-xs">
+              <a
+                href="#about"
+                className="text-zinc-400 transition-colors hover:text-white"
+              >
+                회사소개
+              </a>
+              <a
+                href="#"
+                className="text-zinc-400 transition-colors hover:text-white"
+              >
+                이용약관
+              </a>
+              <a
+                href="#"
+                className="font-semibold text-zinc-200 transition-colors hover:text-white"
+              >
+                개인정보처리방침
+              </a>
+            </nav>
+            <p className="mt-4 text-xs text-zinc-600">
+              Copyright © 2026 {BRAND}. All Rights Reserved.
+            </p>
           </div>
-
-          <div>
-            <div className="text-sm font-semibold text-zinc-300">연락처</div>
-            <ul className="mt-4 space-y-2 text-sm text-zinc-500">
-              <li>
-                <a
-                  href={`tel:${PHONE_TEL}`}
-                  className="transition-colors hover:text-zinc-300"
-                >
-                  전화 문의
-                </a>
-              </li>
-              <li>{ADDRESS}</li>
-            </ul>
-          </div>
-        </div>
-        <div className="mx-auto mt-12 max-w-7xl border-t border-white/10 pt-8 text-xs text-zinc-600">
-          © 2026 {BRAND}. All rights reserved.
         </div>
       </footer>
     </div>
