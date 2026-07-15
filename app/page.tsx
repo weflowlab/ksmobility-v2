@@ -26,17 +26,20 @@ const PILLARS = [
   { no: "04", title: "전담 컨시어지", desc: "상담부터 출고까지 전 과정을 책임지는 1:1 전담 서비스." },
 ];
 
+/* Expanding hover panels */
 const COLLECTIONS = [
   { name: "플래그십 하이 리무진", tag: "FLAGSHIP", desc: "최상위 라인업. 하이루프 기반의 프리미엄 리무진." },
-  { name: "하이 리무진", tag: "HIGH", desc: "여유로운 실내 공간과 완성도를 갖춘 표준 하이루프." },
-  { name: "로우 리무진", tag: "LOW", desc: "도심형 프로파일의 컴팩트 커스텀 리무진." },
+  { name: "하이 리무진", tag: "HIGH LIMOUSINE", desc: "여유로운 실내 공간과 완성도를 갖춘 표준 하이루프." },
+  { name: "로우 리무진", tag: "LOW LIMOUSINE", desc: "도심형 프로파일의 컴팩트 커스텀 리무진." },
 ];
 
-const FEATURES = [
-  { t: "빌트인 PC", d: "차량에 내장된 고성능 컴퓨팅 시스템." },
-  { t: "앱 컨트롤", d: "전용 애플리케이션으로 실내 환경을 제어." },
-  { t: "통합 컨트롤", d: "조명 · 사운드 · 디스플레이를 하나의 인터페이스로." },
-  { t: "몰입형 사운드", d: "공간 전체를 감싸는 프리미엄 오디오 설계." },
+/* Pinned scroll-sequence slides */
+const SEQ = [
+  { tag: "55\" DIGITAL SKY VIEW", title: "디지털 스카이뷰" },
+  { tag: "BUILT-IN PC", title: "빌트인 PC" },
+  { tag: "APP CONTROL", title: "앱 컨트롤" },
+  { tag: "INTEGRATED CONTROL", title: "통합 컨트롤" },
+  { tag: "IMMERSIVE SOUND", title: "몰입형 사운드" },
 ];
 
 const GALLERY = Array.from({ length: 8 }, (_, i) => `VIDEO ${String(i + 1).padStart(2, "0")}`);
@@ -54,13 +57,11 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const reduce = useReducedMotion();
 
-  /* Hero auto-rotate */
   useEffect(() => {
     const t = setInterval(() => setSlide((s) => (s + 1) % HERO_SLIDES.length), 4500);
     return () => clearInterval(t);
   }, []);
 
-  /* Header state on scroll */
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
     onScroll();
@@ -74,27 +75,25 @@ export default function Home() {
       const mm = gsap.matchMedia();
 
       mm.add(
-        {
-          isReduced: "(prefers-reduced-motion: reduce)",
-          isOk: "(prefers-reduced-motion: no-preference)",
-        },
+        { isReduced: "(prefers-reduced-motion: reduce)", isOk: "(prefers-reduced-motion: no-preference)" },
         (ctx) => {
           const conditions = ctx.conditions as { isReduced: boolean; isOk: boolean };
 
-          // Reduced motion: reveal everything, snap counters to final.
           if (conditions.isReduced) {
             gsap.set("[data-reveal]", { opacity: 1, y: 0 });
-            gsap.set("[data-clip]", { clipPath: "inset(0 0% 0 0)" });
             document.querySelectorAll<HTMLElement>("[data-counter]").forEach((el) => {
               el.textContent = el.dataset.to ?? "";
             });
+            // Show only the first sequence slide, static.
+            gsap.set("[data-seq-img]", { opacity: 0 });
+            const first = document.querySelector<HTMLElement>("[data-seq-img]");
+            if (first) gsap.set(first, { opacity: 1 });
             return;
           }
 
-          // Staggered scroll reveals (grouped)
+          /* Staggered reveals */
           gsap.utils.toArray<HTMLElement>("[data-reveal-group]").forEach((group) => {
-            const items = group.querySelectorAll("[data-reveal]");
-            gsap.from(items, {
+            gsap.from(group.querySelectorAll("[data-reveal]"), {
               y: 44,
               opacity: 0,
               duration: 0.9,
@@ -104,7 +103,7 @@ export default function Home() {
             });
           });
 
-          // Solo reveals
+          /* Solo reveals */
           gsap.utils.toArray<HTMLElement>("[data-reveal-solo]").forEach((el) => {
             gsap.from(el, {
               y: 44,
@@ -115,7 +114,7 @@ export default function Home() {
             });
           });
 
-          // Scrubbed parallax on media blocks
+          /* Scrubbed parallax (taller-than-container media slides within overflow) */
           gsap.utils.toArray<HTMLElement>("[data-parallax]").forEach((el) => {
             gsap.fromTo(
               el,
@@ -123,27 +122,12 @@ export default function Home() {
               {
                 yPercent: 8,
                 ease: "none",
-                scrollTrigger: {
-                  trigger: el.parentElement,
-                  start: "top bottom",
-                  end: "bottom top",
-                  scrub: true,
-                },
+                scrollTrigger: { trigger: el.parentElement, start: "top bottom", end: "bottom top", scrub: true },
               }
             );
           });
 
-          // clip-path wipe reveal
-          gsap.utils.toArray<HTMLElement>("[data-clip]").forEach((el) => {
-            gsap.from(el, {
-              clipPath: "inset(0 100% 0 0)",
-              duration: 1.2,
-              ease: "power3.inOut",
-              scrollTrigger: { trigger: el, start: "top 80%" },
-            });
-          });
-
-          // Animated counters
+          /* Animated counters */
           gsap.utils.toArray<HTMLElement>("[data-counter]").forEach((el) => {
             const to = Number(el.dataset.to ?? 0);
             const obj = { v: 0 };
@@ -161,10 +145,42 @@ export default function Home() {
             });
           });
 
-          // Infinite marquee
+          /* Infinite marquee */
           gsap.utils.toArray<HTMLElement>("[data-marquee]").forEach((track) => {
             gsap.to(track, { xPercent: -50, repeat: -1, duration: 22, ease: "none" });
           });
+
+          /* ── Pinned scroll sequence (image 5장 crossfade) ── */
+          const seq = document.querySelector<HTMLElement>("[data-seq]");
+          if (seq) {
+            const pinEl = seq.querySelector<HTMLElement>("[data-seq-pin]");
+            const imgs = gsap.utils.toArray<HTMLElement>("[data-seq-img]", seq);
+            const dots = gsap.utils.toArray<HTMLElement>("[data-seq-dot]", seq);
+            if (pinEl && imgs.length > 1) {
+              gsap.set(imgs, { opacity: 0 });
+              gsap.set(imgs[0], { opacity: 1 });
+              const setDot = (idx: number) =>
+                dots.forEach((d, i) => {
+                  d.style.height = i === idx ? "28px" : "8px";
+                  d.style.backgroundColor = i === idx ? "#ffffff" : "rgba(255,255,255,0.3)";
+                });
+              setDot(0);
+
+              const tl = gsap.timeline({
+                scrollTrigger: {
+                  trigger: seq,
+                  start: "top top",
+                  end: "+=" + imgs.length * 100 + "%",
+                  pin: pinEl,
+                  scrub: 0.6,
+                  onUpdate: (self) => setDot(Math.round(self.progress * (imgs.length - 1))),
+                },
+              });
+              for (let i = 1; i < imgs.length; i++) {
+                tl.to(imgs[i - 1], { opacity: 0, ease: "none" }).to(imgs[i], { opacity: 1, ease: "none" }, "<");
+              }
+            }
+          }
         }
       );
     },
@@ -206,11 +222,7 @@ export default function Home() {
             >
               상담 신청
             </a>
-            <button
-              aria-label="메뉴 열기"
-              onClick={() => setMenuOpen(true)}
-              className="flex flex-col gap-1.5 lg:hidden"
-            >
+            <button aria-label="메뉴 열기" onClick={() => setMenuOpen(true)} className="flex flex-col gap-1.5 lg:hidden">
               <span className="h-0.5 w-6 bg-white" />
               <span className="h-0.5 w-6 bg-white" />
               <span className="h-0.5 w-6 bg-white" />
@@ -237,30 +249,17 @@ export default function Home() {
               transition={{ type: "tween", duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               className="fixed inset-y-0 right-0 z-[70] flex w-72 flex-col bg-[#0e0e10] p-8 lg:hidden"
             >
-              <button
-                aria-label="메뉴 닫기"
-                onClick={() => setMenuOpen(false)}
-                className="mb-10 self-end text-2xl text-zinc-400"
-              >
+              <button aria-label="메뉴 닫기" onClick={() => setMenuOpen(false)} className="mb-10 self-end text-2xl text-zinc-400">
                 ✕
               </button>
               <nav className="flex flex-col gap-6 text-lg">
                 {NAV.map((n) => (
-                  <a
-                    key={n.href}
-                    href={n.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="text-zinc-200 transition-colors hover:text-white"
-                  >
+                  <a key={n.href} href={n.href} onClick={() => setMenuOpen(false)} className="text-zinc-200 transition-colors hover:text-white">
                     {n.label}
                   </a>
                 ))}
               </nav>
-              <a
-                href="#consult"
-                onClick={() => setMenuOpen(false)}
-                className="mt-auto rounded-full bg-white px-5 py-3 text-center text-sm font-semibold text-black"
-              >
+              <a href="#consult" onClick={() => setMenuOpen(false)} className="mt-auto rounded-full bg-white px-5 py-3 text-center text-sm font-semibold text-black">
                 상담 신청
               </a>
             </motion.aside>
@@ -274,13 +273,9 @@ export default function Home() {
           {HERO_SLIDES.map((label, i) => (
             <motion.div
               key={label}
-              data-label={label}
               className="ph absolute inset-0"
               animate={i === slide ? { opacity: 1, scale: reduce ? 1 : 1.1 } : { opacity: 0, scale: 1 }}
-              transition={{
-                opacity: { duration: 1.2, ease: "easeInOut" },
-                scale: { duration: 6, ease: "linear" },
-              }}
+              transition={{ opacity: { duration: 1.2, ease: "easeInOut" }, scale: { duration: 6, ease: "linear" } }}
             />
           ))}
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/85" />
@@ -301,24 +296,15 @@ export default function Home() {
                 단 하나의 모빌리티
               </h1>,
               <div key="c" className="mt-10 flex flex-col gap-4 sm:flex-row">
-                <a
-                  href="#builder"
-                  className="rounded-full bg-white px-8 py-3 text-sm font-semibold text-black transition-colors hover:bg-zinc-200"
-                >
+                <a href="#builder" className="rounded-full bg-white px-8 py-3 text-sm font-semibold text-black transition-colors hover:bg-zinc-200">
                   커스텀 시작하기
                 </a>
-                <a
-                  href="#models"
-                  className="rounded-full border border-white/30 px-8 py-3 text-sm font-semibold transition-colors hover:bg-white/10"
-                >
+                <a href="#models" className="rounded-full border border-white/30 px-8 py-3 text-sm font-semibold transition-colors hover:bg-white/10">
                   모델 살펴보기
                 </a>
               </div>,
             ].map((el, i) => (
-              <motion.div
-                key={i}
-                variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.7 } } }}
-              >
+              <motion.div key={i} variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.7 } } }}>
                 {el}
               </motion.div>
             ))}
@@ -338,10 +324,7 @@ export default function Home() {
 
         {/* ── Why KS ── */}
         <Section id="brand" eyebrow="WHY KS MOBILITY" title="선택받는 이유">
-          <div
-            data-reveal-group
-            className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-4"
-          >
+          <div data-reveal-group className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
             {PILLARS.map((p) => (
               <div data-reveal key={p.no} className="bg-[#0e0e10] p-8">
                 <div className="font-mono text-sm text-zinc-500">{p.no}</div>
@@ -352,60 +335,79 @@ export default function Home() {
           </div>
         </Section>
 
-        {/* ── Collections ── */}
-        <Section id="models" eyebrow="PRODUCT COLLECTIONS" title="라인업">
-          <div data-reveal-group className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* ── Collections — expanding hover panels ── */}
+        <section id="models" className="py-24">
+          <div className="mx-auto max-w-7xl px-6">
+            <div data-reveal-group className="mb-12">
+              <p data-reveal className="text-xs tracking-[0.3em] text-zinc-500">
+                PRODUCT COLLECTIONS
+              </p>
+              <h2 data-reveal className="mt-3 text-3xl font-semibold sm:text-4xl">
+                라인업
+              </h2>
+            </div>
+          </div>
+
+          {/* Hover one panel → it expands, siblings shrink */}
+          <div className="flex h-[60vh] w-full flex-col gap-1 px-1 sm:h-[80vh] lg:flex-row">
             {COLLECTIONS.map((c) => (
               <a
-                data-reveal
                 key={c.name}
                 href="#consult"
-                className="group overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e10] transition-colors hover:border-white/25"
+                className="ph group relative flex-1 overflow-hidden rounded-xl transition-all duration-700 ease-out hover:grow-[2.6]"
               >
-                <div className="aspect-[4/3] w-full overflow-hidden">
-                  <div
-                    data-label={c.tag}
-                    className="ph h-full w-full transition-transform duration-700 group-hover:scale-110"
-                  />
-                </div>
-                <div className="p-6">
-                  <div className="text-xs tracking-[0.2em] text-zinc-500">{c.tag}</div>
-                  <h3 className="mt-2 text-xl font-semibold">{c.name}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-zinc-400">{c.desc}</p>
-                  <span className="mt-5 inline-block text-sm text-zinc-300 transition-transform group-hover:translate-x-1">
+                <div className="absolute inset-0 scale-100 bg-gradient-to-t from-black/85 via-black/20 to-transparent transition-transform duration-700 group-hover:scale-105" />
+                <div className="absolute bottom-0 left-0 p-8">
+                  <div className="text-xs tracking-[0.25em] text-zinc-300">{c.tag}</div>
+                  <h3 className="mt-2 text-2xl font-semibold sm:text-3xl">{c.name}</h3>
+                  <p className="mt-3 max-w-xs translate-y-2 text-sm text-zinc-300 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+                    {c.desc}
+                  </p>
+                  <span className="mt-4 inline-block text-sm text-white opacity-0 transition-opacity delay-100 duration-500 group-hover:opacity-100">
                     자세히 보기 →
                   </span>
                 </div>
               </a>
             ))}
           </div>
-        </Section>
+        </section>
 
-        {/* ── Feature showcase (sticky pin + clip reveal) ── */}
-        <Section id="builder" eyebrow='55" DIGITAL SKY VIEW' title="공간을 완성하는 기술">
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
-            <div className="lg:sticky lg:top-28 lg:h-fit">
-              <div data-clip className="ph aspect-[4/5] w-full overflow-hidden rounded-2xl">
-                <div data-parallax data-label="FEATURE SHOWCASE" className="ph absolute inset-0 scale-110" />
-              </div>
-            </div>
-            <div data-reveal-group className="flex flex-col gap-10 py-4">
-              {FEATURES.map((f, i) => (
-                <div data-reveal key={f.t} className="border-l-2 border-white/20 pl-6">
-                  <div className="font-mono text-sm text-zinc-500">{String(i + 1).padStart(2, "0")}</div>
-                  <h3 className="mt-3 text-2xl font-semibold">{f.t}</h3>
-                  <p className="mt-2 text-zinc-400">{f.d}</p>
+        {/* ── Feature — pinned scroll sequence (5 slides crossfade) ── */}
+        <section id="builder" data-seq className="relative w-full">
+          <div data-seq-pin className="relative flex h-screen w-full items-center justify-center overflow-hidden">
+            {SEQ.map((s, i) => (
+              <div key={s.tag} data-seq-img className={`ph absolute inset-0 ${i === 0 ? "opacity-100" : "opacity-0"}`}>
+                <div className="absolute inset-0 bg-black/45" />
+                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 text-center">
+                  <div className="text-xs tracking-[0.35em] text-zinc-300">{s.tag}</div>
+                  <h3 className="mt-3 text-3xl font-semibold sm:text-5xl">{s.title}</h3>
                 </div>
+              </div>
+            ))}
+
+            {/* progress dots */}
+            <div className="absolute right-6 top-1/2 flex -translate-y-1/2 flex-col items-center gap-3 sm:right-10">
+              {SEQ.map((s, i) => (
+                <span
+                  key={s.tag}
+                  data-seq-dot
+                  className="w-1.5 rounded-full transition-all duration-300"
+                  style={{ height: i === 0 ? "28px" : "8px", backgroundColor: i === 0 ? "#fff" : "rgba(255,255,255,0.3)" }}
+                />
               ))}
             </div>
+
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[11px] tracking-[0.3em] text-zinc-500">
+              SCROLL ↓
+            </div>
           </div>
-        </Section>
+        </section>
 
         {/* ── Craft / video ── */}
         <Section id="craft" eyebrow="THE CRAFT" title="제작 과정">
           <div data-reveal-solo className="relative overflow-hidden rounded-2xl border border-white/10">
             <div className="aspect-[21/9] w-full overflow-hidden">
-              <div data-parallax data-label="CRAFT VIDEO" className="ph absolute inset-0 scale-110" />
+              <div data-parallax className="ph h-[124%] w-full" />
             </div>
             <motion.button
               aria-label="영상 재생"
@@ -423,13 +425,13 @@ export default function Home() {
           <div data-reveal-group className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {GALLERY.map((g) => (
               <div data-reveal key={g} className="aspect-video w-full overflow-hidden rounded-xl">
-                <div data-label={g} className="ph h-full w-full transition-transform duration-700 hover:scale-110" />
+                <div className="ph h-full w-full transition-transform duration-700 hover:scale-110" />
               </div>
             ))}
           </div>
         </Section>
 
-        {/* ── Press (marquee) ── */}
+        {/* ── Press — marquee ── */}
         <Section id="press" eyebrow="PRESS COVERAGE" title="언론 보도">
           <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e10] py-10">
             <div data-marquee className="flex w-max gap-16 px-8">
@@ -442,7 +444,7 @@ export default function Home() {
           </div>
         </Section>
 
-        {/* ── Certifications (counters) ── */}
+        {/* ── Certifications — counters ── */}
         <Section id="support" eyebrow="CERTIFICATIONS" title="인증 및 파트너십">
           <div data-reveal-group className="grid grid-cols-1 gap-6 sm:grid-cols-3">
             {STATS.map((s) => (

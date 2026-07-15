@@ -18,23 +18,13 @@ body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
-/* Placeholder media blocks — stand in for photos/videos in this skeleton */
+/* Placeholder media blocks — stand in for photos/videos in this skeleton.
+   No position/display set so Tailwind positioning utilities stay in control. */
 .ph {
   background-image: linear-gradient(135deg, #1b1b1f 0%, #2a2a30 50%, #141417 100%);
-  position: relative;
+  background-size: cover;
+  background-position: center;
   overflow: hidden;
-}
-.ph::after {
-  content: attr(data-label);
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.28);
 }
 
 @keyframes fadeUp {
