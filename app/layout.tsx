@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KS MOBILITY — Premium Custom Mobility",
-  description: "프리미엄 커스텀 모빌리티 · KS MOBILITY",
+  title: "특장카니발 특장맨 — 프리미엄 특장 카니발 전문",
+  description:
+    "특장카니발 특장맨 · 프리미엄 특장 카니발 제작·커스텀 전문. 인천 남동구. 상담 문의 환영.",
 };
 
 export default function RootLayout({

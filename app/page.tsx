@@ -9,6 +9,30 @@ import Lenis from "lenis";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
+/* Brand & contact info */
+const BRAND = "특장카니발 특장맨";
+const PHONE = "010-8449-4347";
+const PHONE_TEL = "01084494347";
+const ADDRESS = "인천 남동구 청능대로 405";
+const KAKAO = "https://open.kakao.com/o/s0xvjpBh";
+const INSTA = "#"; // TODO: 인스타그램 계정 확정 시 실제 링크로 교체
+const MAP_EMBED = `https://maps.google.com/maps?q=${encodeURIComponent(ADDRESS)}&z=16&output=embed`;
+
+/* 공지사항/블로그 (임시 placeholder — 콘텐츠 확정 시 교체) */
+const NOTICES = [
+  {
+    tag: "공지",
+    date: "2026.07.10",
+    title: "특장 카니발 신규 라인업 상담 예약 안내",
+  },
+  {
+    tag: "블로그",
+    date: "2026.06.28",
+    title: "특장 카니발 제작 과정, 이렇게 진행됩니다",
+  },
+  { tag: "공지", date: "2026.06.15", title: "여름 시즌 상담 운영 시간 안내" },
+];
+
 const HERO_SLIDES = [
   "EXTERIOR 01",
   "EXTERIOR 02",
@@ -16,29 +40,6 @@ const HERO_SLIDES = [
   "EXTERIOR 04",
   "INTERIOR 01",
   "INTERIOR 02",
-];
-
-const PILLARS = [
-  {
-    no: "01",
-    title: "독자적 설계",
-    desc: "자체 연구소의 정밀 설계와 구조 해석으로 완성한 커스텀 플랫폼.",
-  },
-  {
-    no: "02",
-    title: "프리미엄 소재",
-    desc: "엄선한 내장재와 가공 기술로 구현한 최상위 마감 품질.",
-  },
-  {
-    no: "03",
-    title: "첨단 기술",
-    desc: "디스플레이 · 조명 · 사운드를 통합 제어하는 지능형 시스템.",
-  },
-  {
-    no: "04",
-    title: "전담 컨시어지",
-    desc: "상담부터 출고까지 전 과정을 책임지는 1:1 전담 서비스.",
-  },
 ];
 
 /* Auto-marquee lineup — 8 products (hover pauses + card enlarges) */
@@ -60,26 +61,6 @@ const SEQ = [
   { tag: "APP CONTROL", title: "앱 컨트롤" },
   { tag: "INTEGRATED CONTROL", title: "통합 컨트롤" },
   { tag: "IMMERSIVE SOUND", title: "몰입형 사운드" },
-];
-
-const GALLERY = Array.from(
-  { length: 8 },
-  (_, i) => `VIDEO ${String(i + 1).padStart(2, "0")}`,
-);
-const PRESS = [
-  "PRESS A",
-  "PRESS B",
-  "PRESS C",
-  "PRESS D",
-  "PRESS E",
-  "PRESS F",
-  "PRESS G",
-  "PRESS H",
-];
-const STATS = [
-  { n: 18, l: "인증 보유" },
-  { n: 3, l: "ISO 표준" },
-  { n: 1, l: "OEM 파트너십" },
 ];
 
 export default function Home() {
@@ -331,9 +312,9 @@ export default function Home() {
 
           <a
             href="#top"
-            className="text-center text-xl font-semibold tracking-[0.35em]"
+            className="whitespace-nowrap text-center text-base font-semibold tracking-[0.15em] sm:text-lg"
           >
-            KS<span className="text-zinc-500">MOBILITY</span>
+            특장카니발 <span className="text-zinc-500">특장맨</span>
           </a>
 
           <div className="flex flex-1 items-center justify-end">
@@ -383,27 +364,28 @@ export default function Home() {
                 key="e"
                 className="mb-4 text-xs tracking-[0.4em] text-zinc-400"
               >
-                LUXURY CUSTOM MOBILITY
+                PREMIUM CARNIVAL SPECIAL VEHICLE
               </p>,
               <h1
                 key="h"
                 className="max-w-3xl text-4xl font-semibold leading-tight sm:text-6xl"
               >
-                당신을 위한
-                <br />단 하나의 모빌리티
+                특장 카니발의 기준,
+                <br />
+                특장맨이 만듭니다
               </h1>,
               <div key="c" className="mt-10 flex flex-col gap-4 sm:flex-row">
                 <a
-                  href="#builder"
+                  href="#consult"
                   className="rounded-full bg-white px-8 py-3 text-sm font-semibold text-black transition-colors hover:bg-zinc-200"
                 >
-                  커스텀 시작하기
+                  상담 신청하기
                 </a>
                 <a
                   href="#models"
                   className="rounded-full border border-white/30 px-8 py-3 text-sm font-semibold transition-colors hover:bg-white/10"
                 >
-                  모델 살펴보기
+                  라인업 보기
                 </a>
               </div>,
             ].map((el, i) => (
@@ -431,21 +413,55 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Why KS ── */}
-        <Section id="brand" eyebrow="WHY KS MOBILITY" title="선택받는 이유">
+        {/* ── 회사/브랜드 소개 ── */}
+        <Section id="about" eyebrow="ABOUT" title="브랜드 소개">
           <div
             data-reveal-group
-            className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-4"
+            className="mb-14 grid grid-cols-1 items-center gap-10 lg:grid-cols-2"
           >
-            {PILLARS.map((p) => (
-              <div data-reveal key={p.no} className="bg-[#0e0e10] p-8">
-                <div className="font-mono text-sm text-zinc-500">{p.no}</div>
-                <h3 className="mt-6 text-lg font-semibold">{p.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-zinc-400">
-                  {p.desc}
-                </p>
+            <div
+              data-reveal
+              className="group aspect-[4/3] w-full overflow-hidden rounded-2xl"
+            >
+              <div
+                data-parallax
+                className="ph h-[122%] w-full transition-transform duration-700 group-hover:scale-105"
+              />
+            </div>
+            <div>
+              <h3
+                data-reveal
+                className="text-2xl font-semibold leading-snug sm:text-3xl"
+              >
+                특장 카니발 전문, 특장맨
+              </h3>
+              <p data-reveal className="mt-5 leading-relaxed text-zinc-400">
+                {BRAND}은 카니발 기반의 특장·커스텀 제작을 전문으로 합니다.
+                <br />
+                꼼꼼한 설계와 시공, 그리고 출고 후까지 이어지는 관리로
+                <br />
+                고객 한 분 한 분께 신뢰를 드립니다.
+              </p>
+              <p data-reveal className="mt-4 leading-relaxed text-zinc-400">
+                상담부터 제작, 인도까지 전 과정을 직접 챙깁니다.
+                <br />
+                원하시는 사양을 편하게 문의해 주세요.
+              </p>
+              <div data-reveal className="mt-8 flex flex-wrap gap-3 text-sm">
+                <a
+                  href="#consult"
+                  className="rounded-full bg-white px-6 py-2.5 font-semibold text-black transition-colors hover:bg-zinc-200"
+                >
+                  상담 문의
+                </a>
+                <a
+                  href={`tel:${PHONE_TEL}`}
+                  className="rounded-full border border-white/25 px-6 py-2.5 transition-colors hover:bg-white/10"
+                >
+                  전화 문의
+                </a>
               </div>
-            ))}
+            </div>
           </div>
         </Section>
 
@@ -585,87 +601,170 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Media gallery ── */}
-        <Section id="gallery" eyebrow="MEDIA GALLERY" title="갤러리">
-          <div
-            data-reveal-group
-            className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4"
-          >
-            {GALLERY.map((g) => (
-              <div
-                data-reveal
-                key={g}
-                className="aspect-video w-full overflow-hidden rounded-xl"
-              >
-                <div className="ph h-full w-full transition-transform duration-700 hover:scale-110" />
-              </div>
-            ))}
-          </div>
-        </Section>
-
-        {/* ── Press — marquee ── */}
-        <Section id="press" eyebrow="PRESS COVERAGE" title="언론 보도">
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e10] py-10">
-            <div data-marquee className="flex w-max gap-16 px-8">
-              {[...PRESS, ...PRESS].map((p, i) => (
-                <span
+        {/* ── 인스타그램 (신뢰) ── */}
+        <Section id="instagram" eyebrow="INSTAGRAM" title="인스타그램">
+          <div>
+            <p data-reveal-solo className="mb-8 max-w-xl text-zinc-400">
+              작업 과정과 실제 시공 사례를 인스타그램에서 확인하실 수 있습니다.
+            </p>
+            <div data-reveal-group className="grid grid-cols-3 gap-3 sm:gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <a
+                  data-reveal
                   key={i}
-                  className="whitespace-nowrap text-lg tracking-widest text-zinc-500"
+                  href={INSTA}
+                  className="aspect-square overflow-hidden rounded-xl"
                 >
-                  {p}
-                </span>
+                  <div className="ph h-full w-full transition-transform duration-500 hover:scale-110" />
+                </a>
               ))}
+            </div>
+            <div data-reveal-solo className="mt-8">
+              <a
+                href={INSTA}
+                className="inline-block rounded-full border border-white/25 px-6 py-2.5 text-sm transition-colors hover:bg-white/10"
+              >
+                인스타그램 팔로우 →
+              </a>
             </div>
           </div>
         </Section>
 
-        {/* ── Certifications — counters ── */}
-        <Section id="support" eyebrow="CERTIFICATIONS" title="인증 및 파트너십">
+        {/* ── 공지사항 / 블로그 ── */}
+        <Section id="notice" eyebrow="NEWS & BLOG" title="공지사항 · 블로그">
           <div
             data-reveal-group
-            className="grid grid-cols-1 gap-6 sm:grid-cols-3"
+            className="divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e10]"
           >
-            {STATS.map((s) => (
-              <div
+            {NOTICES.map((n) => (
+              <a
                 data-reveal
-                key={s.l}
-                className="rounded-2xl border border-white/10 bg-[#0e0e10] p-10 text-center"
+                key={n.title}
+                href="#"
+                className="flex items-center gap-4 p-6 transition-colors hover:bg-white/5"
               >
-                <div
-                  data-counter
-                  data-to={s.n}
-                  className="text-5xl font-semibold tabular-nums"
-                >
-                  0
-                </div>
-                <div className="mt-3 text-sm tracking-wider text-zinc-400">
-                  {s.l}
-                </div>
-              </div>
+                <span className="w-14 shrink-0 rounded-full border border-white/20 py-1 text-center text-xs text-zinc-400">
+                  {n.tag}
+                </span>
+                <span className="flex-1 truncate font-medium">{n.title}</span>
+                <span className="hidden shrink-0 text-sm text-zinc-500 sm:block">
+                  {n.date}
+                </span>
+              </a>
             ))}
           </div>
         </Section>
 
-        {/* ── Final CTA ── */}
-        <section id="consult" className="border-y border-white/10 bg-[#0e0e10]">
+        {/* ── 오시는 길 ── */}
+        <Section id="location" eyebrow="LOCATION" title="오시는 길">
           <div
-            data-reveal-solo
-            className="mx-auto max-w-4xl px-6 py-24 text-center"
+            data-reveal-group
+            className="grid grid-cols-1 gap-8 lg:grid-cols-3"
           >
-            <h2 className="text-3xl font-semibold sm:text-4xl">
-              지금, 당신의 모빌리티를 시작하세요
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-zinc-400">
-              전담 컨시어지가 상담부터 출고까지 함께합니다.
-            </p>
-            <motion.a
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.97 }}
-              href="#top"
-              className="mt-10 inline-block rounded-full bg-white px-10 py-3.5 text-sm font-semibold text-black"
+            <div
+              data-reveal
+              className="overflow-hidden rounded-2xl border border-white/10 lg:col-span-2"
             >
-              상담 신청하기
-            </motion.a>
+              <iframe
+                src={MAP_EMBED}
+                title="오시는 길 지도"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="h-[360px] w-full lg:h-[420px]"
+              />
+            </div>
+            <div
+              data-reveal
+              className="flex flex-col justify-center gap-6 rounded-2xl border border-white/10 bg-[#0e0e10] p-8"
+            >
+              <div>
+                <div className="text-xs tracking-[0.2em] text-zinc-500">
+                  ADDRESS
+                </div>
+                <div className="mt-2 font-medium">{ADDRESS}</div>
+              </div>
+              <div>
+                <div className="text-xs tracking-[0.2em] text-zinc-500">
+                  TEL
+                </div>
+                <a
+                  href={`tel:${PHONE_TEL}`}
+                  className="mt-2 block font-medium transition-colors hover:text-white"
+                >
+                  {PHONE}
+                </a>
+              </div>
+            </div>
+          </div>
+        </Section>
+
+        {/* ── 문의하기 ── */}
+        <section id="consult" className="border-y border-white/10 bg-[#0e0e10]">
+          <div data-reveal-solo className="mx-auto max-w-4xl px-6 py-24">
+            <div className="mb-10 text-center">
+              <p className="text-xs tracking-[0.3em] text-zinc-500">CONTACT</p>
+              <h2 className="mt-3 text-3xl font-semibold sm:text-4xl">
+                상담 · 문의하기
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-zinc-400">
+                아래 폼을 남겨주시거나, 카카오톡 · 전화로 편하게 문의해 주세요.
+              </p>
+            </div>
+
+            <div className="mb-10 flex flex-wrap justify-center gap-3 text-sm">
+              <a
+                href={KAKAO}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full bg-[#FEE500] px-6 py-3 font-semibold text-black transition-opacity hover:opacity-90"
+              >
+                카카오톡 오픈채팅
+              </a>
+              <a
+                href={`tel:${PHONE_TEL}`}
+                className="rounded-full border border-white/25 px-6 py-3 font-semibold transition-colors hover:bg-white/10"
+              >
+                전화 상담
+              </a>
+              <a
+                href={INSTA}
+                className="rounded-full border border-white/25 px-6 py-3 font-semibold transition-colors hover:bg-white/10"
+              >
+                인스타그램
+              </a>
+            </div>
+
+            {/* 폼 UI만 제공 — 전송 연동은 관리자 페이지 구축 후 */}
+            <form
+              onSubmit={(e) => e.preventDefault()}
+              className="mx-auto grid max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2"
+            >
+              <input
+                required
+                placeholder="이름"
+                className="rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm outline-none placeholder:text-zinc-500 focus:border-white/40"
+              />
+              <input
+                required
+                placeholder="연락처"
+                className="rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm outline-none placeholder:text-zinc-500 focus:border-white/40"
+              />
+              <textarea
+                placeholder="문의 내용"
+                rows={5}
+                className="rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm outline-none placeholder:text-zinc-500 focus:border-white/40 sm:col-span-2"
+              />
+              <button
+                type="submit"
+                className="rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-black transition-colors hover:bg-zinc-200 sm:col-span-2"
+              >
+                문의 남기기
+              </button>
+              <p className="text-center text-xs text-zinc-600 sm:col-span-2">
+                * 현재는 폼 UI만 제공됩니다. 전송 기능은 관리자 페이지 구축 후
+                연동됩니다. 급하시면 카카오톡 · 전화로 문의해 주세요.
+              </p>
+            </form>
           </div>
         </section>
       </main>
@@ -673,53 +772,78 @@ export default function Home() {
       {/* ── Footer ── */}
       <footer className="bg-[#0a0a0b] px-6 py-16">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <div className="text-lg font-semibold tracking-[0.3em]">
-              KS<span className="text-zinc-500">MOBILITY</span>
+          <div className="lg:col-span-2">
+            <div className="text-lg font-semibold tracking-[0.15em]">
+              특장카니발 <span className="text-zinc-500">특장맨</span>
             </div>
             <p className="mt-4 text-sm leading-relaxed text-zinc-500">
-              프리미엄 커스텀 모빌리티 브랜드.
+              카니발 기반 특장 · 커스텀 제작 전문.
               <br />
-              상담 및 문의는 아래 연락처로.
+              상담 및 문의는 아래 연락처로 편하게 남겨주세요.
             </p>
-          </div>
-          {[
-            { h: "회사", items: ["브랜드", "모델", "갤러리", "고객지원"] },
-            {
-              h: "고객지원",
-              items: [
-                "상담 신청",
-                "커스텀 빌더",
-                "자주 묻는 질문",
-                "오시는 길",
-              ],
-            },
-            {
-              h: "연락처",
-              items: [
-                "TEL. 000-0000-0000",
-                "MAIL. info@ksmobility.example",
-                "인천광역시 ○○구 ○○로",
-                "평일 09:00 – 18:00",
-              ],
-            },
-          ].map((col) => (
-            <div key={col.h}>
-              <div className="text-sm font-semibold text-zinc-300">{col.h}</div>
-              <ul className="mt-4 space-y-2 text-sm text-zinc-500">
-                {col.items.map((it) => (
-                  <li key={it}>
-                    <span className="transition-colors hover:text-zinc-300">
-                      {it}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+            <div className="mt-6 flex flex-wrap gap-3 text-sm">
+              <a
+                href={KAKAO}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full border border-white/20 px-4 py-2 text-zinc-300 transition-colors hover:bg-white/10"
+              >
+                카카오톡
+              </a>
+              <a
+                href={INSTA}
+                className="rounded-full border border-white/20 px-4 py-2 text-zinc-300 transition-colors hover:bg-white/10"
+              >
+                인스타그램
+              </a>
+              <a
+                href={`tel:${PHONE_TEL}`}
+                className="rounded-full border border-white/20 px-4 py-2 text-zinc-300 transition-colors hover:bg-white/10"
+              >
+                전화
+              </a>
             </div>
-          ))}
+          </div>
+
+          <div>
+            <div className="text-sm font-semibold text-zinc-300">바로가기</div>
+            <ul className="mt-4 space-y-2 text-sm text-zinc-500">
+              {[
+                { l: "브랜드 소개", href: "#about" },
+                { l: "라인업", href: "#models" },
+                { l: "공지 · 블로그", href: "#notice" },
+                { l: "오시는 길", href: "#location" },
+                { l: "문의하기", href: "#consult" },
+              ].map((it) => (
+                <li key={it.l}>
+                  <a
+                    href={it.href}
+                    className="transition-colors hover:text-zinc-300"
+                  >
+                    {it.l}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <div className="text-sm font-semibold text-zinc-300">연락처</div>
+            <ul className="mt-4 space-y-2 text-sm text-zinc-500">
+              <li>
+                <a
+                  href={`tel:${PHONE_TEL}`}
+                  className="transition-colors hover:text-zinc-300"
+                >
+                  전화 문의
+                </a>
+              </li>
+              <li>{ADDRESS}</li>
+            </ul>
+          </div>
         </div>
         <div className="mx-auto mt-12 max-w-7xl border-t border-white/10 pt-8 text-xs text-zinc-600">
-          © 2026 KS MOBILITY. 본 페이지는 레이아웃 구조 예시(skeleton)입니다.
+          © 2026 {BRAND}. All rights reserved.
         </div>
       </footer>
     </div>
