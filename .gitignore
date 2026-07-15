@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# source photo library (원본 앨범 — public/lineup 로 선별 복사)
+/assets-src

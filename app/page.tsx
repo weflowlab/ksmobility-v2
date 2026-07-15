@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { gsap } from "gsap";
@@ -39,16 +40,16 @@ const HERO_SLIDES = [
   "INTERIOR 02",
 ];
 
-/* Auto-marquee lineup — 8 products (hover pauses + card enlarges) */
+/* 라인업 — 8개 상품 (사진: /public/lineup) */
 const PRODUCTS = [
-  { name: "플래그십 하이 리무진", tag: "FLAGSHIP" },
-  { name: "하이 리무진", tag: "HIGH LIMOUSINE" },
-  { name: "로우 리무진", tag: "LOW LIMOUSINE" },
-  { name: "프리미엄 라운지", tag: "LOUNGE" },
-  { name: "비즈니스 에디션", tag: "BUSINESS" },
-  { name: "패밀리 에디션", tag: "FAMILY" },
-  { name: "캠퍼 컨버전", tag: "CAMPER" },
-  { name: "스페셜 오더", tag: "BESPOKE" },
+  { name: "K-2 패키지 아이보리", tag: "K-2 PACKAGE", img: "/lineup/01.jpg" },
+  { name: "스카이블루", tag: "KSH26-016K2", img: "/lineup/02.jpg" },
+  { name: "바닐라", tag: "KSH26-026P4", img: "/lineup/03.jpg" },
+  { name: "M 패키지 베이지", tag: "M PACKAGE", img: "/lineup/04.jpg" },
+  { name: "K-2 패키지 오렌지베이지", tag: "K-2 PACKAGE", img: "/lineup/05.jpg" },
+  { name: "레드", tag: "RED", img: "/lineup/06.jpg" },
+  { name: "블랙 아이보리", tag: "BLACK IVORY", img: "/lineup/07.jpg" },
+  { name: "카키 4인승", tag: "KHAKI · 4인승", img: "/lineup/08.jpg" },
 ];
 
 /* 인스타그램 핀 스크롤 시퀀스 (첫 슬라이드 = 인스타그램) */
@@ -551,6 +552,14 @@ export default function Home() {
                 href="#consult"
                 className="ph group relative min-w-0 flex-1 overflow-hidden rounded-xl transition-all duration-500 ease-out hover:grow-[5]"
               >
+                <Image
+                  src={p.img}
+                  alt={p.name}
+                  fill
+                  quality={90}
+                  sizes="50vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
                 {/* collapsed: vertical tag */}
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs tracking-[0.3em] text-white/70 transition-opacity duration-300 [writing-mode:vertical-rl] group-hover:opacity-0">
@@ -583,6 +592,14 @@ export default function Home() {
                 href="#consult"
                 className="ph group relative aspect-[3/4] overflow-hidden rounded-xl"
               >
+                <Image
+                  src={p.img}
+                  alt={p.name}
+                  fill
+                  quality={90}
+                  sizes="50vw"
+                  className="object-cover"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-4">
                   <div className="text-[10px] tracking-[0.2em] text-zinc-400">
