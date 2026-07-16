@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { GALLERY } from "./gallery";
 import { gsap } from "gsap";
@@ -386,44 +386,41 @@ export default function Home() {
               );
           }
 
-          /* ── Pinned scroll sequence (image 5장 crossfade) ── */
+          /* ── Pinned sequence: 스크롤로 한 장씩 '하드컷' 전환 (크로스페이드 없음) ── */
           const seq = document.querySelector<HTMLElement>("[data-seq]");
           if (seq) {
             const pinEl = seq.querySelector<HTMLElement>("[data-seq-pin]");
             const imgs = gsap.utils.toArray<HTMLElement>("[data-seq-img]", seq);
             const dots = gsap.utils.toArray<HTMLElement>("[data-seq-dot]", seq);
             if (pinEl && imgs.length > 1) {
-              gsap.set(imgs, { autoAlpha: 0 });
-              gsap.set(imgs[0], { autoAlpha: 1 });
-              const setDot = (idx: number) =>
+              const show = (idx: number) => {
+                imgs.forEach((im, i) =>
+                  gsap.set(im, { autoAlpha: i === idx ? 1 : 0 }),
+                );
                 dots.forEach((d, i) => {
                   d.style.height = i === idx ? "28px" : "8px";
                   d.style.backgroundColor =
                     i === idx ? "#ffffff" : "rgba(255,255,255,0.3)";
                 });
-              setDot(0);
+              };
+              show(0);
 
-              const tl = gsap.timeline({
-                scrollTrigger: {
-                  trigger: seq,
-                  start: "top top",
-                  end: "+=" + imgs.length * 100 + "%",
-                  pin: pinEl,
-                  scrub: 0.6,
-                  // Pinned + above the craft trigger → refresh first so the
-                  // craft trigger's positions account for this pin's spacing.
-                  refreshPriority: 1,
-                  onUpdate: (self) =>
-                    setDot(Math.round(self.progress * (imgs.length - 1))),
+              ScrollTrigger.create({
+                trigger: seq,
+                start: "top top",
+                end: "+=" + imgs.length * 100 + "%",
+                pin: pinEl,
+                // 스크롤 위치를 슬라이드 경계에 딱 맞춰 정지 → 딱딱 넘어감
+                snap: {
+                  snapTo: 1 / (imgs.length - 1),
+                  duration: 0.25,
+                  ease: "power1.inOut",
                 },
+                refreshPriority: 1,
+                // 진행도를 반올림해 활성 슬라이드만 즉시 표시(겹침·페이드 없음)
+                onUpdate: (self) =>
+                  show(Math.round(self.progress * (imgs.length - 1))),
               });
-              for (let i = 1; i < imgs.length; i++) {
-                tl.to(imgs[i - 1], { autoAlpha: 0, ease: "none" }).to(
-                  imgs[i],
-                  { autoAlpha: 1, ease: "none" },
-                  "<",
-                );
-              }
             }
           }
         },
@@ -856,7 +853,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── 인스타그램 (핀 스크롤 시퀀스 · 첫 슬라이드 = 인스타그램) ── */}
+        {/* ── SNS · 소셜 (핀 고정 · 스크롤로 한 장씩 하드컷 전환) ── */}
         <section id="instagram" data-seq className="relative w-full">
           <div
             data-seq-pin
@@ -960,18 +957,30 @@ export default function Home() {
         <section id="craft" className="overflow-hidden py-24">
           <div className="mx-auto mb-12 max-w-7xl px-6">
             <div data-reveal-group>
-              <p data-reveal className="text-xs tracking-[0.3em] text-zinc-500">
+              <p
+                data-reveal
+                className="text-xs tracking-[0.3em] text-zinc-500"
+              >
                 SHORTS
               </p>
-              <h2
-                data-reveal
-                className="mt-3 text-3xl font-semibold sm:text-4xl"
-              >
-                왜 특장 카니발일까?
-              </h2>
-              <p data-reveal className="mt-3 text-sm text-zinc-400">
-                그 이유를 릴스로 만나보세요!
-              </p>
+              <div className="mt-3 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                <div data-reveal>
+                  <h2 className="text-3xl font-semibold sm:text-4xl">
+                    왜 특장 카니발일까?
+                  </h2>
+                  <p className="mt-3 text-sm text-zinc-400">
+                    그 이유를 릴스로 만나보세요!
+                  </p>
+                </div>
+                <a
+                  href={YOUTUBE_CHANNEL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex shrink-0 items-center gap-2 self-end rounded-full bg-[#FF0000] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 sm:self-auto"
+                >
+                  구독하러 가기 <span aria-hidden>→</span>
+                </a>
+              </div>
             </div>
           </div>
           <CraftShorts />
@@ -1319,220 +1328,215 @@ export default function Home() {
   );
 }
 
-/* ── Craft: 유튜브 쇼츠(세로 9:16) 코버플로우 캐러셀 ──
-   가운데 카드만 iframe으로 재생(음소거 자동재생·반복), 양옆은 썸네일 미리보기.
-   섹션이 화면에 들어온 뒤에야 플레이어를 로드해 불필요한 로딩을 줄임. */
+/* ── Craft: 유튜브 쇼츠(세로 9:16) 무한 가로 스크롤 갤러리 ──
+   목록을 3벌 복제해 렌더하고, 스크롤이 양끝으로 치우치면 가운데 복제본으로
+   '보이지 않게' 재중앙화 → 진짜 끊김 없는 360 순환 (모바일 스와이프 지원).
+   가운데 온 카드만 iframe으로 재생, 나머지는 썸네일. 데스크탑만 하단 바 노출. */
 function CraftShorts() {
-  // 슬라이드 = 쇼츠 N개 + 마지막 구독 엔드카드 1개
-  const total = SHORTS.length + 1;
-  const REPEAT = 3; // 무한 루프용으로 목록을 3벌 복제해 렌더
-  const positions = total * REPEAT;
+  const N = SHORTS.length;
+  const COPIES = 3;
+  const items = Array.from({ length: N * COPIES }, (_, k) => SHORTS[k % N]);
 
-  const [index, setIndex] = useState(total); // 가운데 복제본의 첫 카드에서 시작
-  const [noAnim, setNoAnim] = useState(true); // 최초 위치 잡을 땐 애니메이션 off
+  const [center, setCenter] = useState(N); // 가운데 온 카드의 raw 인덱스 (가운데 복제본 시작)
   const [inView, setInView] = useState(false);
-  const [offset, setOffset] = useState(0);
+  const [phase, setPhase] = useState(0); // 한 사이클 내 위치 0..1 (데스크탑 바)
   const rootRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLElement | null)[]>([]);
+  const copyWRef = useRef(0); // 복제본 1벌의 가로 폭(px)
 
-  const activeReal = ((index % total) + total) % total;
+  const centerCard = (i: number, behavior: ScrollBehavior = "smooth") => {
+    const sc = scrollRef.current;
+    const el = cardRefs.current[i];
+    if (!sc || !el) return;
+    sc.scrollTo({
+      left: el.offsetLeft + el.offsetWidth / 2 - sc.clientWidth / 2,
+      behavior,
+    });
+  };
 
-  // 활성 카드를 컨테이너 정중앙에 맞춤 (index/resize 시 재계산).
-  // 실제 화면 좌표(getBoundingClientRect)로 현재 위치와의 차이만큼 보정 →
-  // 컨테이너 패딩(px-6)과 무관하게 정확히 가운데 정렬.
-  useEffect(() => {
-    const compute = () => {
-      const track = trackRef.current;
-      const card = track?.children[index] as HTMLElement | undefined;
-      const container = track?.parentElement;
-      if (!track || !card || !container) return;
-      const c = container.getBoundingClientRect();
-      const k = card.getBoundingClientRect();
-      const delta = c.left + c.width / 2 - (k.left + k.width / 2);
-      setOffset((prev) => prev + delta);
-    };
-    compute();
-    window.addEventListener("resize", compute);
-    return () => window.removeEventListener("resize", compute);
-  }, [index]);
-
-  // Defer loading the YouTube player until the section is scrolled into view.
+  // 섹션이 화면에 들어온 뒤에만 플레이어 로드.
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
     const io = new IntersectionObserver(
       ([e]) => e.isIntersecting && setInView(true),
-      { threshold: 0.25 },
+      { threshold: 0.2 },
     );
     io.observe(el);
     return () => io.disconnect();
   }, []);
 
-  // 무애니메이션 스냅 후 다음 프레임에 애니메이션 복구.
+  // 복제본 폭 측정 + 가운데 복제본으로 초기 정렬.
   useEffect(() => {
-    if (!noAnim) return;
-    const id = requestAnimationFrame(() =>
-      requestAnimationFrame(() => setNoAnim(false)),
-    );
-    return () => cancelAnimationFrame(id);
-  }, [noAnim]);
+    const sc = scrollRef.current;
+    if (!sc) return;
+    const init = () => {
+      const a = cardRefs.current[0];
+      const b = cardRefs.current[N];
+      if (a && b) copyWRef.current = b.offsetLeft - a.offsetLeft;
+      centerCard(N, "auto");
+    };
+    const id = requestAnimationFrame(init);
+    window.addEventListener("resize", init);
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener("resize", init);
+    };
+  }, [N]);
 
-  // 이동이 끝나면 가운데 복제본 범위로 조용히 되돌림 → 무한 루프.
-  const settle = () => {
-    if (index < total) {
-      setNoAnim(true);
-      setIndex(index + total);
-    } else if (index >= total * 2) {
-      setNoAnim(true);
-      setIndex(index - total);
-    }
+  // 가운데 복제본(영상1~영상N)을 중앙에 놓는 scrollLeft 구간 [start, end].
+  // 데스크탑 바 위치·드래그가 같은 기준을 쓰도록 공용.
+  const midSpan = useCallback(() => {
+    const sc = scrollRef.current;
+    const first = cardRefs.current[N];
+    const last = cardRefs.current[2 * N - 1];
+    if (!sc || !first || !last) return null;
+    return {
+      start: first.offsetLeft + first.offsetWidth / 2 - sc.clientWidth / 2,
+      end: last.offsetLeft + last.offsetWidth / 2 - sc.clientWidth / 2,
+    };
+  }, [N]);
+
+  // 스크롤: (1) 가운데 카드 판정 + 바 위치, (2) 멈춘 뒤 가운데 복제본으로 재중앙화.
+  useEffect(() => {
+    const sc = scrollRef.current;
+    if (!sc) return;
+    let endTimer: ReturnType<typeof setTimeout>;
+
+    const nearestCard = () => {
+      const cx = sc.scrollLeft + sc.clientWidth / 2;
+      let best = 0;
+      let bd = Infinity;
+      cardRefs.current.forEach((el, i) => {
+        if (!el) return;
+        const c = el.offsetLeft + el.offsetWidth / 2;
+        const d = Math.abs(c - cx);
+        if (d < bd) {
+          bd = d;
+          best = i;
+        }
+      });
+      return best;
+    };
+
+    // 스크롤이 멈추면 가운데 카드를 항상 가운데 복제본[N,2N)으로 되돌림.
+    // (복제본이 동일 → 눈에 안 띔, 관성도 안 끊김) → 끊김 없는 무한 순환.
+    const recenter = () => {
+      const cw = copyWRef.current;
+      if (!cw) return;
+      const best = nearestCard();
+      if (best < N) sc.scrollLeft += cw;
+      else if (best >= 2 * N) sc.scrollLeft -= cw;
+    };
+
+    const update = () => {
+      setCenter(nearestCard());
+      const span = midSpan();
+      if (span && span.end > span.start) {
+        const p = (sc.scrollLeft - span.start) / (span.end - span.start);
+        setPhase(Math.min(1, Math.max(0, p)));
+      }
+      clearTimeout(endTimer);
+      endTimer = setTimeout(recenter, 120);
+    };
+
+    update();
+    sc.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      clearTimeout(endTimer);
+      sc.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [N, midSpan]);
+
+  // 데스크탑 하단 바 드래그 → 바 위치(phase)와 동일 기준(midSpan)으로 스크롤.
+  const dragTo = (clientX: number) => {
+    const sc = scrollRef.current;
+    const bar = barRef.current;
+    const span = midSpan();
+    if (!sc || !bar || !span) return;
+    const rect = bar.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    sc.scrollLeft = span.start + ratio * (span.end - span.start);
   };
-
-  const go = (d: number) => setIndex((x) => x + d);
-  const goTo = (real: number) => {
-    let delta = real - activeReal;
-    if (delta > total / 2) delta -= total; // 더 가까운 방향으로 회전
-    if (delta < -total / 2) delta += total;
-    setIndex((x) => x + delta);
+  const onBarDown = (e: React.PointerEvent) => {
+    e.preventDefault();
+    dragTo(e.clientX);
+    const move = (ev: PointerEvent) => dragTo(ev.clientX);
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
   };
 
   return (
     <div ref={rootRef} className="relative w-full">
-      <div className="overflow-hidden px-6 py-4">
-        <div
-          ref={trackRef}
-          onTransitionEnd={(e) => {
-            if (e.target === e.currentTarget && e.propertyName === "transform")
-              settle();
-          }}
-          className={`relative flex items-center gap-4 sm:gap-6 ${
-            noAnim ? "" : "transition-transform duration-500 ease-out"
-          }`}
-          style={{ transform: `translateX(${offset}px)` }}
-        >
-          {Array.from({ length: positions }).map((_, pos) => {
-            const real = pos % total;
-            const isActive = pos === index;
-
-            // 마지막 real 인덱스 = 구독 엔드카드
-            if (real === SHORTS.length) {
-              return (
-                <div
-                  key={pos}
-                  onClick={() => setIndex(pos)}
-                  className={`relative flex aspect-[9/16] w-[74vw] max-w-[300px] shrink-0 cursor-pointer flex-col items-center justify-center gap-5 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-[#1c1c20] to-[#0a0a0b] px-6 text-center transition-all duration-500 sm:w-[300px] ${
-                    isActive
-                      ? "scale-100 opacity-100 shadow-2xl shadow-black/50"
-                      : "scale-90 opacity-40 hover:opacity-70"
-                  }`}
-                >
-                  <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#FF0000] text-white">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="h-9 w-9"
-                    >
-                      <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.5 15.5v-7l6.3 3.5-6.3 3.5Z" />
-                    </svg>
-                  </span>
-                  <div>
-                    <h3 className="text-xl font-semibold">특장맨 유튜브</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-                      구독하고 더 많은
-                      <br />
-                      제작 영상을 만나보세요!
-                    </p>
-                  </div>
-                  <a
-                    href={YOUTUBE_CHANNEL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="rounded-full bg-[#FF0000] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                  >
-                    구독하러 가기 →
-                  </a>
-                </div>
-              );
-            }
-
-            const s = SHORTS[real];
-            return (
-              <button
-                type="button"
-                key={pos}
-                onClick={() => setIndex(pos)}
-                aria-label={s.title}
-                className={`relative aspect-[9/16] w-[74vw] max-w-[300px] shrink-0 cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e10] transition-all duration-500 sm:w-[300px] ${
-                  isActive
-                    ? "scale-100 opacity-100 shadow-2xl shadow-black/50"
-                    : "scale-90 opacity-40 hover:opacity-70"
-                }`}
-              >
-                {isActive && inView ? (
-                  <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${s.id}?autoplay=1&mute=1&loop=1&playlist=${s.id}&controls=1&playsinline=1&rel=0&modestbranding=1`}
-                    title={s.title}
-                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                    className="absolute inset-0 h-full w-full"
+      {/* 무한 가로 스크롤 트랙 (모바일 스와이프 · 네이티브 스크롤바 숨김) */}
+      <div
+        ref={scrollRef}
+        className="relative flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-6 py-4 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-6 [&::-webkit-scrollbar]:hidden"
+      >
+        {items.map((s, i) => {
+          const isActive = i === center;
+          return (
+            <button
+              type="button"
+              key={i}
+              ref={(el) => {
+                cardRefs.current[i] = el;
+              }}
+              // 클릭 시 가운데 복제본의 같은 영상으로 정렬 → 재중앙화 충돌 방지
+              onClick={() => centerCard(N + (i % N))}
+              aria-label={s.title}
+              className={`relative aspect-[9/16] w-[74vw] max-w-[300px] shrink-0 snap-center cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e10] transition-all duration-500 sm:w-[300px] ${
+                isActive
+                  ? "scale-100 opacity-100 shadow-2xl shadow-black/50"
+                  : "scale-90 opacity-40 hover:opacity-70"
+              }`}
+            >
+              {isActive && inView ? (
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${s.id}?autoplay=1&mute=1&loop=1&playlist=${s.id}&controls=1&playsinline=1&rel=0&modestbranding=1`}
+                  title={s.title}
+                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                  className="absolute inset-0 h-full w-full"
+                />
+              ) : (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`https://i.ytimg.com/vi/${s.id}/hqdefault.jpg`}
+                    alt={s.title}
+                    className="absolute inset-0 h-full w-full object-cover"
                   />
-                ) : (
-                  <>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={`https://i.ytimg.com/vi/${s.id}/hqdefault.jpg`}
-                      alt={s.title}
-                      className="absolute inset-0 h-full w-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/30" />
-                    <span className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 pl-1 text-white backdrop-blur-sm">
-                      ▶
-                    </span>
-                  </>
-                )}
-              </button>
-            );
-          })}
-        </div>
+                  <div className="absolute inset-0 bg-black/30" />
+                  <span className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 pl-1 text-white backdrop-blur-sm">
+                    ▶
+                  </span>
+                </>
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      {/* prev / next (무한 루프 → 항상 활성) */}
-      <button
-        type="button"
-        onClick={() => go(-1)}
-        aria-label="이전 영상"
-        className="absolute left-4 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/60 text-xl text-white backdrop-blur-sm transition-colors hover:bg-black/80 sm:left-8"
-      >
-        ‹
-      </button>
-      <button
-        type="button"
-        onClick={() => go(1)}
-        aria-label="다음 영상"
-        className="absolute right-4 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/60 text-xl text-white backdrop-blur-sm transition-colors hover:bg-black/80 sm:right-8"
-      >
-        ›
-      </button>
-
-      {/* dots (마지막 = 구독 엔드카드) */}
-      <div className="mt-6 flex justify-center gap-2">
-        {Array.from({ length: total }).map((_, i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => goTo(i)}
-            aria-label={
-              i === SHORTS.length ? "유튜브 구독 카드" : `${i + 1}번째 영상`
-            }
-            className={`h-1.5 cursor-pointer rounded-full transition-all ${
-              i === activeReal
-                ? i === SHORTS.length
-                  ? "w-8 bg-[#FF0000]"
-                  : "w-8 bg-white"
-                : "w-1.5 bg-white/30"
-            }`}
+      {/* 하단 가로 바 (데스크탑 전용 · 모바일은 스와이프만) */}
+      <div className="mx-auto mt-6 hidden w-[min(300px,74vw)] sm:block">
+        <div
+          ref={barRef}
+          onPointerDown={onBarDown}
+          className="h-1.5 w-full cursor-pointer touch-none rounded-full bg-white/10"
+        >
+          <div
+            className="h-full w-1/4 rounded-full bg-white/60"
+            style={{ marginLeft: `${phase * 75}%` }}
           />
-        ))}
+        </div>
       </div>
     </div>
   );
