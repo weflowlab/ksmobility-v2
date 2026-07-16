@@ -71,6 +71,11 @@ html.lenis body {
   }
 }
 
+/* 라인업 패널(버튼)은 클릭 가능 → 손가락 커서 */
+button.ph {
+  cursor: pointer;
+}
+
 /* Animated nav underline */
 .nav-link {
   position: relative;

@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { GALLERY } from "./gallery";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -42,14 +43,14 @@ const HERO_SLIDES = [
 
 /* 라인업 — 8개 상품 (사진: /public/lineup) */
 const PRODUCTS = [
-  { name: "K-2 패키지 아이보리", tag: "K-2 PACKAGE", img: "/lineup/01.jpg" },
-  { name: "스카이블루", tag: "KSH26-016K2", img: "/lineup/02.jpg" },
-  { name: "바닐라", tag: "KSH26-026P4", img: "/lineup/03.jpg" },
-  { name: "M 패키지 베이지", tag: "M PACKAGE", img: "/lineup/04.jpg" },
-  { name: "K-2 패키지 오렌지베이지", tag: "K-2 PACKAGE", img: "/lineup/05.jpg" },
-  { name: "레드", tag: "RED", img: "/lineup/06.jpg" },
-  { name: "블랙 아이보리", tag: "BLACK IVORY", img: "/lineup/07.jpg" },
-  { name: "카키 4인승", tag: "KHAKI · 4인승", img: "/lineup/08.jpg" },
+  { name: "Ivory", tag: "K-2 PACKAGE", img: "/lineup/01.jpg" },
+  { name: "Sky Blue", tag: "KSH26-016K2", img: "/lineup/02.jpg" },
+  { name: "Vanilla", tag: "KSH26-026P4", img: "/lineup/03.jpg" },
+  { name: "Beige", tag: "M PACKAGE", img: "/lineup/04.jpg" },
+  { name: "Orange Beige", tag: "K-2 PACKAGE", img: "/lineup/05.jpg" },
+  { name: "Red", tag: "CUSTOM", img: "/lineup/06.jpg" },
+  { name: "Black Ivory", tag: "CUSTOM", img: "/lineup/07.jpg" },
+  { name: "Khaki", tag: "4인승", img: "/lineup/08.jpg" },
 ];
 
 /* 인스타그램 핀 스크롤 시퀀스 (첫 슬라이드 = 인스타그램) */
@@ -65,7 +66,18 @@ export default function Home() {
   const root = useRef<HTMLDivElement>(null);
   const [slide, setSlide] = useState(0);
   const [scrolled, setScrolled] = useState(false);
+  const [gallery, setGallery] = useState<number | null>(null);
   const reduce = useReducedMotion();
+
+  // Close the product gallery on Escape.
+  useEffect(() => {
+    if (gallery === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setGallery(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [gallery]);
 
   // Smooth (momentum) scrolling for the landing page + smooth anchor nav.
   // Always start at the top on load/refresh; integrates with GSAP ScrollTrigger.
@@ -388,6 +400,58 @@ export default function Home() {
         </a>
       </div>
 
+      {/* ── 상품 갤러리 라이트박스 (자세히 보기) ── */}
+      <AnimatePresence>
+        {gallery !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[90] flex flex-col bg-black/95 backdrop-blur-sm"
+          >
+            <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-6 py-4">
+              <div>
+                <div className="text-xs tracking-[0.2em] text-zinc-400">
+                  {PRODUCTS[gallery].tag}
+                </div>
+                <h3 className="mt-0.5 text-lg font-semibold">
+                  {PRODUCTS[gallery].name}
+                  <span className="ml-2 text-sm font-normal text-zinc-500">
+                    {GALLERY[gallery]?.length ?? 0}장
+                  </span>
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setGallery(null)}
+                aria-label="닫기"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-xl text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            <div data-lenis-prevent className="flex-1 overflow-y-auto p-4 sm:p-6">
+              <div className="mx-auto grid max-w-6xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {(GALLERY[gallery] ?? []).map((src, idx) => (
+                  <div
+                    key={src}
+                    className="relative aspect-[4/3] overflow-hidden rounded-xl bg-[#111]"
+                  >
+                    <Image
+                      src={src}
+                      alt={`${PRODUCTS[gallery].name} ${idx + 1}`}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 33vw"
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <main id="top">
         {/* ── Hero carousel ── */}
         <section className="relative h-screen w-full overflow-hidden">
@@ -479,10 +543,19 @@ export default function Home() {
           id="about"
           className="relative flex min-h-screen w-full items-center justify-center overflow-hidden"
         >
-          {/* 배경: 실제 사진 넣기 전 스포트라이트 그라데이션 (사진 준비되면 이 블록 교체) */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_75%_60%_at_50%_38%,#2c2c34_0%,#16161b_48%,#0a0a0b_100%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(255,255,255,0.06),transparent_45%)]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70" />
+          {/* 배경: 실내 디테일 무드컷 (어둡게 눌러 텍스트 가독성 확보) */}
+          <Image
+            src="/products/02/016.jpg"
+            alt=""
+            aria-hidden
+            fill
+            quality={90}
+            sizes="100vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-black/55" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(0,0,0,0)_0%,rgba(10,10,11,0.75)_70%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80" />
 
           <div
             data-about
@@ -547,10 +620,11 @@ export default function Home() {
           {/* Desktop: 8 thin panels in a row; hover expands the panel */}
           <div className="hidden h-[70vh] w-full gap-1.5 px-1.5 lg:flex">
             {PRODUCTS.map((p, i) => (
-              <a
+              <button
+                type="button"
                 key={p.name}
-                href="#consult"
-                className="ph group relative min-w-0 flex-1 overflow-hidden rounded-xl transition-all duration-500 ease-out hover:grow-[5]"
+                onClick={() => setGallery(i)}
+                className="ph group relative min-w-0 flex-1 overflow-hidden rounded-xl text-left transition-all duration-500 ease-out hover:grow-[5]"
               >
                 <Image
                   src={p.img}
@@ -561,9 +635,9 @@ export default function Home() {
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
-                {/* collapsed: vertical tag */}
+                {/* collapsed: vertical name (color) */}
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs tracking-[0.3em] text-white/70 transition-opacity duration-300 [writing-mode:vertical-rl] group-hover:opacity-0">
-                  {p.tag}
+                  {p.name}
                 </div>
                 {/* expanded: full caption */}
                 <div className="absolute bottom-0 left-0 w-max p-8 opacity-0 transition-opacity delay-100 duration-500 group-hover:opacity-100">
@@ -580,17 +654,18 @@ export default function Home() {
                     자세히 보기 →
                   </span>
                 </div>
-              </a>
+              </button>
             ))}
           </div>
 
           {/* Mobile: 2-column grid */}
           <div className="grid grid-cols-2 gap-3 px-6 lg:hidden">
             {PRODUCTS.map((p, i) => (
-              <a
+              <button
+                type="button"
                 key={p.name}
-                href="#consult"
-                className="ph group relative aspect-[3/4] overflow-hidden rounded-xl"
+                onClick={() => setGallery(i)}
+                className="ph group relative aspect-[3/4] overflow-hidden rounded-xl text-left"
               >
                 <Image
                   src={p.img}
@@ -607,7 +682,7 @@ export default function Home() {
                   </div>
                   <h3 className="mt-1 text-sm font-semibold">{p.name}</h3>
                 </div>
-              </a>
+              </button>
             ))}
           </div>
         </section>
@@ -901,7 +976,13 @@ export default function Home() {
                 >
                   <rect x="3" y="3" width="18" height="18" rx="5" />
                   <circle cx="12" cy="12" r="4" />
-                  <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                  <circle
+                    cx="17.5"
+                    cy="6.5"
+                    r="1"
+                    fill="currentColor"
+                    stroke="none"
+                  />
                 </svg>
               </a>
               <a
@@ -911,7 +992,11 @@ export default function Home() {
                 aria-label="카카오톡"
                 className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
               >
-                <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="h-5 w-5"
+                >
                   <path d="M12 4C7.3 4 3.5 7 3.5 10.7c0 2.3 1.6 4.4 4 5.6-.2.6-.6 2.1-.7 2.4 0 .2.1.3.3.2.2-.1 2.2-1.5 3-2 .6.1 1.2.1 1.9.1 4.7 0 8.5-3 8.5-6.7S16.7 4 12 4z" />
                 </svg>
               </a>
@@ -920,7 +1005,11 @@ export default function Home() {
                 aria-label="전화"
                 className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
               >
-                <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="h-5 w-5"
+                >
                   <path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.3 21 3 13.7 3 4c0-.6.4-1 1-1h3.4c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.3 1L6.6 10.8z" />
                 </svg>
               </a>
