@@ -1479,7 +1479,7 @@ function CraftShorts() {
       {/* 무한 가로 스크롤 트랙 (모바일 스와이프 · 네이티브 스크롤바 숨김) */}
       <div
         ref={scrollRef}
-        className="relative flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-6 py-4 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-6 [&::-webkit-scrollbar]:hidden"
+        className="relative flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 py-4 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-6 [&::-webkit-scrollbar]:hidden"
       >
         {items.map((s, i) => {
           const isActive = i === center;
