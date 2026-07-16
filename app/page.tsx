@@ -408,13 +408,15 @@ export default function Home() {
               ScrollTrigger.create({
                 trigger: seq,
                 start: "top top",
-                end: "+=" + imgs.length * 100 + "%",
+                // 슬라이드당 스크롤 거리를 짧게(50vh) → 스크롤 한 번에 한 칸씩.
+                end: "+=" + imgs.length * 50 + "%",
                 pin: pinEl,
-                // 스크롤 위치를 슬라이드 경계에 딱 맞춰 정지 → 딱딱 넘어감
+                // 스크롤 방향으로 다음 슬라이드에 딱 맞춰 정지(방향성 스냅).
                 snap: {
                   snapTo: 1 / (imgs.length - 1),
-                  duration: 0.25,
+                  duration: { min: 0.15, max: 0.3 },
                   ease: "power1.inOut",
+                  directional: true,
                 },
                 refreshPriority: 1,
                 // 진행도를 반올림해 활성 슬라이드만 즉시 표시(겹침·페이드 없음)
@@ -867,21 +869,33 @@ export default function Home() {
               >
                 {s.img ? (
                   <>
+                    {/* 블러 확대본으로 여백 채움 (레터박스 대신) */}
+                    <Image
+                      src={s.img}
+                      alt=""
+                      aria-hidden
+                      fill
+                      sizes="100vw"
+                      className="scale-110 object-cover blur-2xl"
+                    />
+                    <div className="absolute inset-0 bg-black/40" />
+                    {/* 전체가 다 보이는 메인 스크린샷 (축소해서 전부 노출) */}
                     <Image
                       src={s.imgMobile ?? s.img}
                       alt={s.title}
                       fill
                       sizes="100vw"
-                      className="object-cover lg:hidden"
+                      className="object-contain lg:hidden"
                     />
                     <Image
                       src={s.img}
                       alt={s.title}
                       fill
                       sizes="100vw"
-                      className="hidden object-cover lg:block"
+                      className="hidden object-contain lg:block"
                     />
-                    <div className="absolute inset-0 bg-black/55" />
+                    {/* 텍스트 가독성용: 스크린샷은 살리고 하단만 어둡게 */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/25" />
                     <div className="absolute bottom-24 left-1/2 w-full max-w-2xl -translate-x-1/2 px-6 text-center">
                       <div className="text-xs tracking-[0.35em] text-zinc-300">
                         {s.tag}
