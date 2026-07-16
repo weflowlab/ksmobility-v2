@@ -76,6 +76,15 @@ button.ph {
   cursor: pointer;
 }
 
+/* 스크롤바 숨김 (썸네일 스트립 등) — 스크롤은 되지만 바는 안 보임 */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Animated nav underline */
 .nav-link {
   position: relative;

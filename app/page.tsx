@@ -17,28 +17,54 @@ const PHONE = "010-8449-4347";
 const PHONE_TEL = "01084494347";
 const ADDRESS = "인천 남동구 청능대로 405";
 const KAKAO = "https://open.kakao.com/o/s0xvjpBh";
-const INSTA = "#"; // TODO: 인스타그램 계정 확정 시 실제 링크로 교체
+const YOUTUBE_CHANNEL = "https://youtube.com/@special_carnival";
+const INSTA = "https://www.instagram.com/teukjang_man/"; // TODO: 인스타그램 계정 확정 시 실제 링크로 교체
 const MAP_EMBED = `https://maps.google.com/maps?q=${encodeURIComponent(ADDRESS)}&z=16&output=embed`;
 
 /* 공지사항 / 블로그 (임시 placeholder — 콘텐츠 확정 시 교체) */
 const NOTICES = [
-  { date: "2026.07.10", title: "특장 카니발 신규 라인업 상담 예약 안내" },
-  { date: "2026.06.15", title: "여름 시즌 상담 운영 안내" },
-  { date: "2026.05.20", title: "5월 상담 예약 관련 공지" },
+  {
+    date: "2026.07.10",
+    title: "특장 카니발 신규 라인업 상담 예약 안내",
+    body: "신규 라인업 상담 예약을 받고 있습니다. 원하시는 사양은 카카오톡 또는 전화로 편하게 문의 주세요.",
+  },
+  {
+    date: "2026.06.15",
+    title: "여름 시즌 상담 운영 안내",
+    body: "여름 시즌 상담 운영 일정 관련 안내입니다. 자세한 내용은 문의 바랍니다.",
+  },
+  {
+    date: "2026.05.20",
+    title: "5월 상담 예약 관련 공지",
+    body: "5월 상담 예약 관련 공지사항입니다. 예약 문의는 연락처로 부탁드립니다.",
+  },
 ];
-const BLOG = [
-  { date: "2026.06.28", title: "특장 카니발 제작 과정, 이렇게 진행됩니다" },
-  { date: "2026.06.05", title: "특장 카니발, 고를 때 체크할 5가지" },
-  { date: "2026.05.12", title: "내부 옵션 커스텀 어디까지 가능할까" },
+
+const FAQ = [
+  {
+    q: "상담은 어떻게 진행되나요?",
+    a: "카카오톡 오픈채팅 또는 전화로 편하게 문의 주시면 안내해 드립니다.",
+  },
+  {
+    q: "원하는 사양으로 커스텀 되나요?",
+    a: "네, 원하시는 사양·예산에 맞춰 상담 후 진행합니다.",
+  },
+  {
+    q: "실물은 어디서 볼 수 있나요?",
+    a: "인천 남동구 매장 방문, 또는 인스타·유튜브에서 확인하실 수 있습니다.",
+  },
 ];
 
 const HERO_SLIDES = [
-  "EXTERIOR 01",
-  "EXTERIOR 02",
-  "EXTERIOR 03",
-  "EXTERIOR 04",
-  "INTERIOR 01",
-  "INTERIOR 02",
+  "/hero/01.jpg",
+  "/hero/02.jpg",
+  "/hero/03.jpg",
+  "/hero/04.jpg",
+  "/hero/05.jpg",
+  "/hero/06.jpg",
+  "/hero/07.jpg",
+  "/hero/08.jpg",
+  "/hero/09.jpg",
 ];
 
 /* 라인업 — 8개 상품 (사진: /public/lineup) */
@@ -54,30 +80,111 @@ const PRODUCTS = [
 ];
 
 /* 인스타그램 핀 스크롤 시퀀스 (첫 슬라이드 = 인스타그램) */
-const SEQ = [
-  { tag: "INSTAGRAM", title: "특장맨 인스타그램" },
-  { tag: "@특장맨", title: "작업 사례 01" },
-  { tag: "@특장맨", title: "작업 사례 02" },
-  { tag: "@특장맨", title: "작업 사례 03" },
-  { tag: "@특장맨", title: "작업 사례 04" },
+const SEQ: {
+  tag: string;
+  title: string;
+  desc: string;
+  href: string | null;
+  cta: string | null;
+  img: string | null;
+  imgMobile: string | null;
+}[] = [
+  {
+    tag: "SOCIAL",
+    title: "온라인에서도 투명하게",
+    desc: "인스타그램 · 유튜브 · 틱톡 · 블로그에서 실제 시공 과정과 사례를 꾸준히 공개합니다.",
+    href: null,
+    cta: null,
+    img: null,
+    imgMobile: null,
+  },
+  {
+    tag: "INSTAGRAM",
+    title: "인스타그램",
+    desc: "@teukjang_man",
+    href: "https://www.instagram.com/teukjang_man/",
+    cta: "팔로우하기",
+    img: "/sns/instagram.jpg",
+    imgMobile: "/sns/instagram-m.jpg",
+  },
+  {
+    tag: "YOUTUBE",
+    title: "유튜브",
+    desc: "@special_carnival",
+    href: "https://youtube.com/@special_carnival?si=qaMjhVckbARXcWQh",
+    cta: "구독하기",
+    img: "/sns/youtube.jpg",
+    imgMobile: "/sns/youtube-m.jpg",
+  },
+  {
+    tag: "TIKTOK",
+    title: "틱톡",
+    desc: "@special_carnibal",
+    href: "https://www.tiktok.com/@special_carnibal",
+    cta: "팔로우하기",
+    img: "/sns/tiktok.jpg",
+    imgMobile: "/sns/tiktok-m.jpg",
+  },
+  {
+    tag: "BLOG",
+    title: "블로그",
+    desc: "네이버 블로그",
+    href: "https://blog.naver.com/juju9214",
+    cta: "블로그 보기",
+    img: "/sns/blog.jpg",
+    imgMobile: "/sns/blog-m.jpg",
+  },
+];
+
+/* 특장 카니발 숏폼 — 고객 유튜브 쇼츠 (세로 9:16) 임베드.
+   ID = 쇼츠 URL의 /shorts/ 뒤 부분.  예) https://youtube.com/shorts/AbC123dEfG → "AbC123dEfG" */
+const SHORTS = [
+  { id: "CG9h30DvzZo", title: "특장 카니발 쇼츠 01" },
+  { id: "J1NWLuvqbvk", title: "특장 카니발 쇼츠 02" },
+  { id: "fWh4cC6tlgc", title: "특장 카니발 쇼츠 03" },
+  { id: "_uwwNsEuB8U", title: "특장 카니발 쇼츠 04" },
+  { id: "Qu-QkdaLna0", title: "특장 카니발 쇼츠 05" },
+  { id: "sI0arjurLKE", title: "특장 카니발 쇼츠 06" },
+  { id: "0UtW_GblzNs", title: "특장 카니발 쇼츠 07" },
+  { id: "Ml6KROTAepQ", title: "특장 카니발 쇼츠 08" },
 ];
 
 export default function Home() {
   const root = useRef<HTMLDivElement>(null);
   const [slide, setSlide] = useState(0);
   const [scrolled, setScrolled] = useState(false);
+  const [headerHidden, setHeaderHidden] = useState(false);
   const [gallery, setGallery] = useState<number | null>(null);
+  const [galleryIdx, setGalleryIdx] = useState(0);
   const reduce = useReducedMotion();
 
-  // Close the product gallery on Escape.
+  // Product gallery keyboard nav: Esc closes, ←/→ navigate.
   useEffect(() => {
     if (gallery === null) return;
+    const len = GALLERY[gallery]?.length ?? 0;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setGallery(null);
+      else if (e.key === "ArrowLeft")
+        setGalleryIdx((n) => (n - 1 + len) % (len || 1));
+      else if (e.key === "ArrowRight")
+        setGalleryIdx((n) => (n + 1) % (len || 1));
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [gallery]);
+
+  // Keep the active thumbnail centered as photos change.
+  useEffect(() => {
+    if (gallery === null) return;
+    const el = document.querySelector<HTMLElement>(
+      `[data-thumb="${galleryIdx}"]`,
+    );
+    el?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  }, [gallery, galleryIdx]);
 
   // Smooth (momentum) scrolling for the landing page + smooth anchor nav.
   // Always start at the top on load/refresh; integrates with GSAP ScrollTrigger.
@@ -124,10 +231,25 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 80);
+      if (y < 80) setHeaderHidden(false);
+      else if (y > lastY && y > 120) setHeaderHidden(true);
+      else if (y < lastY) setHeaderHidden(false);
+      lastY = y;
+    };
     onScroll();
+    const onMove = (e: MouseEvent) => {
+      if (e.clientY < 80) setHeaderHidden(false);
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("mousemove", onMove);
+    };
   }, []);
 
   /* ── GSAP ScrollTrigger interactions ── */
@@ -154,11 +276,9 @@ export default function Home() {
                 el.textContent = el.dataset.to ?? "";
               });
             // Show only the first sequence slide, static.
-            gsap.set("[data-seq-img]", { opacity: 0 });
+            gsap.set("[data-seq-img]", { autoAlpha: 0 });
             const first = document.querySelector<HTMLElement>("[data-seq-img]");
-            if (first) gsap.set(first, { opacity: 1 });
-            // Craft video: keep it full, no scroll expand.
-            gsap.set("[data-craft-wrap]", { scale: 1, borderRadius: 0 });
+            if (first) gsap.set(first, { autoAlpha: 1 });
             return;
           }
 
@@ -273,8 +393,8 @@ export default function Home() {
             const imgs = gsap.utils.toArray<HTMLElement>("[data-seq-img]", seq);
             const dots = gsap.utils.toArray<HTMLElement>("[data-seq-dot]", seq);
             if (pinEl && imgs.length > 1) {
-              gsap.set(imgs, { opacity: 0 });
-              gsap.set(imgs[0], { opacity: 1 });
+              gsap.set(imgs, { autoAlpha: 0 });
+              gsap.set(imgs[0], { autoAlpha: 1 });
               const setDot = (idx: number) =>
                 dots.forEach((d, i) => {
                   d.style.height = i === idx ? "28px" : "8px";
@@ -298,37 +418,13 @@ export default function Home() {
                 },
               });
               for (let i = 1; i < imgs.length; i++) {
-                tl.to(imgs[i - 1], { opacity: 0, ease: "none" }).to(
+                tl.to(imgs[i - 1], { autoAlpha: 0, ease: "none" }).to(
                   imgs[i],
-                  { opacity: 1, ease: "none" },
+                  { autoAlpha: 1, ease: "none" },
                   "<",
                 );
               }
             }
-          }
-
-          /* Craft video: expand from a small centered box to full-bleed on scroll.
-             Created AFTER the pinned sequence above (and lower refreshPriority) so its
-             scroll positions include the pin's spacing. Uses transform scale (no reflow). */
-          const craftWrap =
-            document.querySelector<HTMLElement>("[data-craft-wrap]");
-          if (craftWrap) {
-            gsap.fromTo(
-              craftWrap,
-              { scale: 0.8, borderRadius: 32 },
-              {
-                scale: 1,
-                borderRadius: 0,
-                ease: "none",
-                scrollTrigger: {
-                  trigger: craftWrap,
-                  start: "top 80%",
-                  end: "top 25%",
-                  scrub: true,
-                  invalidateOnRefresh: true,
-                },
-              },
-            );
           }
         },
       );
@@ -340,7 +436,7 @@ export default function Home() {
     <div ref={root} className="min-h-screen w-full">
       {/* ── Header ── */}
       <header
-        className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md transition-colors duration-500 ${
+        className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md transition-all duration-300 ${headerHidden ? "-translate-y-full" : "translate-y-0"} ${
           scrolled
             ? "border-white/10 bg-[#0a0a0b]/80"
             : "border-transparent bg-transparent"
@@ -417,7 +513,7 @@ export default function Home() {
                 <h3 className="mt-0.5 text-lg font-semibold">
                   {PRODUCTS[gallery].name}
                   <span className="ml-2 text-sm font-normal text-zinc-500">
-                    {GALLERY[gallery]?.length ?? 0}장
+                    {galleryIdx + 1} / {GALLERY[gallery]?.length ?? 0}
                   </span>
                 </h3>
               </div>
@@ -430,21 +526,78 @@ export default function Home() {
                 ✕
               </button>
             </div>
-            <div data-lenis-prevent className="flex-1 overflow-y-auto p-4 sm:p-6">
-              <div className="mx-auto grid max-w-6xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {/* 메인 사진 + 좌우 화살표 */}
+            <div className="relative flex flex-1 items-center justify-center overflow-hidden px-14 py-4 sm:px-20">
+              <button
+                type="button"
+                onClick={() =>
+                  setGalleryIdx(
+                    (n) =>
+                      (n - 1 + (GALLERY[gallery]?.length ?? 1)) %
+                      (GALLERY[gallery]?.length ?? 1),
+                  )
+                }
+                aria-label="이전"
+                className="absolute left-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/40 text-2xl text-white backdrop-blur-sm transition-colors hover:bg-white/15 sm:left-6"
+              >
+                ‹
+              </button>
+
+              <div className="relative h-full w-full max-w-5xl">
+                <Image
+                  src={
+                    (GALLERY[gallery] ?? [])[galleryIdx] ??
+                    PRODUCTS[gallery].img
+                  }
+                  alt={`${PRODUCTS[gallery].name} ${galleryIdx + 1}`}
+                  fill
+                  sizes="90vw"
+                  className="object-contain"
+                  priority
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setGalleryIdx(
+                    (n) => (n + 1) % (GALLERY[gallery]?.length ?? 1),
+                  )
+                }
+                aria-label="다음"
+                className="absolute right-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/40 text-2xl text-white backdrop-blur-sm transition-colors hover:bg-white/15 sm:right-6"
+              >
+                ›
+              </button>
+            </div>
+
+            {/* 썸네일 스트립 */}
+            <div
+              data-lenis-prevent
+              className="no-scrollbar shrink-0 overflow-x-auto border-t border-white/10 px-4 py-3"
+            >
+              <div className="mx-auto flex w-max gap-2">
                 {(GALLERY[gallery] ?? []).map((src, idx) => (
-                  <div
+                  <button
+                    type="button"
                     key={src}
-                    className="relative aspect-[4/3] overflow-hidden rounded-xl bg-[#111]"
+                    data-thumb={idx}
+                    onClick={() => setGalleryIdx(idx)}
+                    aria-label={`${idx + 1}번 사진`}
+                    className={`relative h-14 w-20 shrink-0 cursor-pointer overflow-hidden rounded-md transition-opacity sm:h-16 sm:w-24 ${
+                      idx === galleryIdx
+                        ? "ring-2 ring-white"
+                        : "opacity-50 hover:opacity-100"
+                    }`}
                   >
                     <Image
                       src={src}
-                      alt={`${PRODUCTS[gallery].name} ${idx + 1}`}
+                      alt=""
                       fill
-                      sizes="(max-width: 1024px) 100vw, 33vw"
+                      sizes="96px"
                       className="object-cover"
                     />
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -455,10 +608,11 @@ export default function Home() {
       <main id="top">
         {/* ── Hero carousel ── */}
         <section className="relative h-screen w-full overflow-hidden">
-          {HERO_SLIDES.map((label, i) => (
+          {HERO_SLIDES.map((src, i) => (
             <motion.div
-              key={label}
-              className="ph absolute inset-0"
+              key={src}
+              className="absolute inset-0"
+              style={{ opacity: i === 0 ? 1 : 0 }}
               animate={
                 i === slide
                   ? { opacity: 1, scale: reduce ? 1 : 1.1 }
@@ -468,9 +622,18 @@ export default function Home() {
                 opacity: { duration: 1.2, ease: "easeInOut" },
                 scale: { duration: 6, ease: "linear" },
               }}
-            />
+            >
+              <Image
+                src={src}
+                alt=""
+                fill
+                priority={i === 0}
+                sizes="100vw"
+                className="object-cover"
+              />
+            </motion.div>
           ))}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/85" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/35 to-black/90" />
 
           <motion.div
             initial="hidden"
@@ -531,7 +694,7 @@ export default function Home() {
                 key={i}
                 aria-label={`슬라이드 ${i + 1}`}
                 onClick={() => setSlide(i)}
-                className={`h-1.5 rounded-full transition-all ${i === slide ? "w-8 bg-white" : "w-1.5 bg-white/40"}`}
+                className={`h-1.5 cursor-pointer rounded-full transition-all ${i === slide ? "w-8 bg-white" : "w-1.5 bg-white/40"}`}
               />
             ))}
           </div>
@@ -623,7 +786,10 @@ export default function Home() {
               <button
                 type="button"
                 key={p.name}
-                onClick={() => setGallery(i)}
+                onClick={() => {
+                  setGalleryIdx(0);
+                  setGallery(i);
+                }}
                 className="ph group relative min-w-0 flex-1 overflow-hidden rounded-xl text-left transition-all duration-500 ease-out hover:grow-[5]"
               >
                 <Image
@@ -664,7 +830,10 @@ export default function Home() {
               <button
                 type="button"
                 key={p.name}
-                onClick={() => setGallery(i)}
+                onClick={() => {
+                  setGalleryIdx(0);
+                  setGallery(i);
+                }}
                 className="ph group relative aspect-[3/4] overflow-hidden rounded-xl text-left"
               >
                 <Image
@@ -697,17 +866,72 @@ export default function Home() {
               <div
                 key={s.title}
                 data-seq-img
-                className={`ph absolute inset-0 ${i === 0 ? "opacity-100" : "opacity-0"}`}
+                className={`absolute inset-0 ${i === 0 ? "opacity-100" : "opacity-0"}`}
               >
-                <div className="absolute inset-0 bg-black/50" />
-                <div className="absolute bottom-28 left-1/2 -translate-x-1/2 px-6 text-center">
-                  <div className="text-xs tracking-[0.35em] text-zinc-300">
-                    {s.tag}
-                  </div>
-                  <h3 className="mt-3 text-3xl font-semibold sm:text-5xl">
-                    {s.title}
-                  </h3>
-                </div>
+                {s.img ? (
+                  <>
+                    <Image
+                      src={s.imgMobile ?? s.img}
+                      alt={s.title}
+                      fill
+                      sizes="100vw"
+                      className="object-cover lg:hidden"
+                    />
+                    <Image
+                      src={s.img}
+                      alt={s.title}
+                      fill
+                      sizes="100vw"
+                      className="hidden object-cover lg:block"
+                    />
+                    <div className="absolute inset-0 bg-black/55" />
+                    <div className="absolute bottom-24 left-1/2 w-full max-w-2xl -translate-x-1/2 px-6 text-center">
+                      <div className="text-xs tracking-[0.35em] text-zinc-300">
+                        {s.tag}
+                      </div>
+                      <h3 className="mt-3 text-3xl font-semibold sm:text-5xl">
+                        {s.title}
+                      </h3>
+                      {s.desc && (
+                        <p className="mx-auto mt-4 max-w-xl leading-relaxed text-zinc-300">
+                          {s.desc}
+                        </p>
+                      )}
+                      {s.href && (
+                        <a
+                          href={s.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-7 inline-block rounded-full border border-white/40 bg-white/10 px-7 py-3 text-sm font-semibold backdrop-blur-sm transition-colors hover:bg-white/20"
+                        >
+                          {s.cta} →
+                        </a>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  /* 사진 없는 인트로 슬라이드 — 큰 볼드 타이포로 처리 */
+                  <>
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_75%_60%_at_50%_40%,#1d1d24_0%,#111116_50%,#0a0a0b_100%)]" />
+                    <div className="absolute inset-0 flex items-center justify-center px-6 text-center">
+                      <div className="max-w-4xl">
+                        <div className="text-xs tracking-[0.4em] text-zinc-400 sm:text-sm">
+                          {s.tag}
+                        </div>
+                        <h3 className="mt-6 text-4xl font-bold leading-[1.15] sm:text-6xl lg:text-7xl">
+                          온라인에서도
+                          <br />
+                          <span className="text-orange-500">투명하게</span>
+                        </h3>
+                        <p className="mx-auto mt-8 max-w-xl leading-relaxed text-zinc-300 sm:text-lg">
+                          인스타그램 · 유튜브 · 틱톡 · 블로그에서
+                          <br />
+                          실제 시공 과정과 사례를 꾸준히 공개합니다.
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             ))}
 
@@ -726,86 +950,101 @@ export default function Home() {
               ))}
             </div>
 
-            {/* 팔로우 버튼 (항상 최상단, 클릭 가능) */}
-            <a
-              href={INSTA}
-              className="absolute bottom-12 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/40 bg-white/5 px-6 py-3 text-sm font-semibold backdrop-blur-sm transition-colors hover:bg-white/15"
-            >
-              인스타그램 팔로우 →
-            </a>
-
             <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 text-[11px] tracking-[0.3em] text-zinc-500">
               SCROLL ↓
             </div>
           </div>
         </section>
 
-        {/* ── Craft / video (auto-play + scroll-driven expand to full-bleed) ── */}
+        {/* ── Craft / 유튜브 쇼츠 캐러셀 (세로 9:16) ── */}
         <section id="craft" className="overflow-hidden py-24">
           <div className="mx-auto mb-12 max-w-7xl px-6">
             <div data-reveal-group>
               <p data-reveal className="text-xs tracking-[0.3em] text-zinc-500">
-                THE CRAFT
+                SHORTS
               </p>
               <h2
                 data-reveal
                 className="mt-3 text-3xl font-semibold sm:text-4xl"
               >
-                제작 과정
+                왜 특장 카니발일까?
               </h2>
+              <p data-reveal className="mt-3 text-sm text-zinc-400">
+                그 이유를 릴스로 만나보세요!
+              </p>
             </div>
           </div>
-          <div
-            data-craft-wrap
-            className="mx-auto w-full origin-center overflow-hidden will-change-transform"
-          >
-            <CraftVideo />
-          </div>
+          <CraftShorts />
         </section>
 
         {/* ── 공지사항 / 블로그 (2열) ── */}
-        <Section id="notice" eyebrow="NEWS & BLOG" title="공지사항 · 블로그">
+        <Section id="notice" eyebrow="NEWS" title="공지사항 · FAQ">
           <div
             data-reveal-group
             className="grid grid-cols-1 gap-6 lg:grid-cols-2"
           >
-            {[
-              { heading: "공지사항", items: NOTICES },
-              { heading: "블로그", items: BLOG },
-            ].map((col) => (
-              <div
-                data-reveal
-                key={col.heading}
-                className="overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e10]"
-              >
-                <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
-                  <h3 className="text-lg font-semibold">{col.heading}</h3>
-                  <a
-                    href="#"
-                    className="text-xs text-zinc-500 transition-colors hover:text-zinc-300"
-                  >
-                    더보기 →
-                  </a>
-                </div>
-                <ul className="divide-y divide-white/5">
-                  {col.items.map((n) => (
-                    <li key={n.title}>
-                      <a
-                        href="#"
-                        className="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-white/5"
-                      >
-                        <span className="flex-1 truncate text-sm font-medium">
-                          {n.title}
-                        </span>
-                        <span className="shrink-0 text-xs text-zinc-500">
-                          {n.date}
-                        </span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
+            {/* 공지사항 리스트 (2칸) */}
+            <div
+              data-reveal
+              className="overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e10]"
+            >
+              <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
+                <h3 className="text-lg font-semibold">공지사항</h3>
               </div>
-            ))}
+              <div className="divide-y divide-white/5">
+                {NOTICES.map((n) => (
+                  <details key={n.title} className="group">
+                    <summary className="flex cursor-pointer list-none items-center gap-4 px-6 py-4 transition-colors hover:bg-white/5 group-open:bg-white/[0.03] [&::-webkit-details-marker]:hidden">
+                      <span className="flex-1 truncate text-sm font-medium text-zinc-200 group-open:text-white">
+                        {n.title}
+                      </span>
+                      <span className="shrink-0 text-xs text-zinc-500">
+                        {n.date}
+                      </span>
+                      <span className="shrink-0 text-zinc-500 transition-transform group-open:rotate-45">
+                        +
+                      </span>
+                    </summary>
+                    <div className="border-t border-white/5 bg-white/[0.02] px-6 py-4">
+                      <p className="border-l-2 border-white/15 pl-4 text-sm leading-relaxed text-zinc-400">
+                        {n.body}
+                      </p>
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </div>
+
+            {/* FAQ (1칸) */}
+            <div
+              data-reveal
+              className="overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e10]"
+            >
+              <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
+                <h3 className="text-lg font-semibold">자주 묻는 질문</h3>
+              </div>
+              <div className="divide-y divide-white/5">
+                {FAQ.map((f) => (
+                  <details key={f.q} className="group">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-4 text-sm font-medium text-zinc-200 transition-colors hover:bg-white/5 group-open:bg-white/[0.03] group-open:text-white [&::-webkit-details-marker]:hidden">
+                      <span className="flex items-center gap-2">
+                        <span className="text-zinc-500">Q.</span>
+                        {f.q}
+                      </span>
+                      <span className="shrink-0 text-zinc-500 transition-transform group-open:rotate-45">
+                        +
+                      </span>
+                    </summary>
+                    <div className="border-t border-white/5 bg-white/[0.02] px-6 py-4">
+                      <p className="flex gap-2 text-sm leading-relaxed text-zinc-400">
+                        <span className="shrink-0 text-zinc-500">A.</span>
+                        {f.a}
+                      </p>
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </div>
           </div>
         </Section>
 
@@ -870,9 +1109,11 @@ export default function Home() {
                 GET IN TOUCH
               </p>
               <h2 className="mt-5 text-4xl font-bold leading-tight sm:text-6xl">
-                특장 카니발이 처음이신가요?
+                특장 카니발이 <br className="sm:hidden" />
+                처음이신가요?
                 <br />
-                무엇이든 편하게 물어보세요.
+                무엇이든 <br className="sm:hidden" />
+                편하게 물어보세요!
               </h2>
               <p className="mx-auto mt-6 max-w-xl text-zinc-300">
                 카카오톡 · 전화 · 인스타그램, 또는 아래 폼으로 남겨주시면 빠르게
@@ -986,6 +1227,36 @@ export default function Home() {
                 </svg>
               </a>
               <a
+                href="https://youtube.com/@special_carnival?si=qaMjhVckbARXcWQh"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="유튜브"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="h-5 w-5"
+                >
+                  <path d="M23 12s0-3.4-.4-5c-.2-.9-.9-1.6-1.8-1.8C19 5 12 5 12 5s-7 0-8.8.2c-.9.2-1.6.9-1.8 1.8C1 8.6 1 12 1 12s0 3.4.4 5c.2.9.9 1.6 1.8 1.8C5 19 12 19 12 19s7 0 8.8-.2c.9-.2 1.6-.9 1.8-1.8.4-1.6.4-5 .4-5zM9.8 15.3V8.7l5.7 3.3-5.7 3.3z" />
+                </svg>
+              </a>
+              <a
+                href="https://www.tiktok.com/@special_carnibal"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="틱톡"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="h-5 w-5"
+                >
+                  <path d="M16.5 3c.3 2 1.6 3.6 3.5 3.9v2.6c-1.3 0-2.5-.4-3.6-1.1v5.6c0 3-2.4 5.4-5.4 5.4S5.6 17 5.6 14s2.4-5.4 5.4-5.4c.3 0 .6 0 .9.1v2.7c-.3-.1-.6-.2-.9-.2-1.5 0-2.7 1.2-2.7 2.7s1.2 2.7 2.7 2.7 2.7-1.2 2.7-2.7V3h2.8z" />
+                </svg>
+              </a>
+              <a
                 href={KAKAO}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -1048,91 +1319,221 @@ export default function Home() {
   );
 }
 
-/* ── Craft video: auto-plays when scrolled into view, pauses when out ── */
-function CraftVideo() {
-  const ref = useRef<HTMLVideoElement>(null);
-  const [muted, setMuted] = useState(true);
-  const [playing, setPlaying] = useState(false);
+/* ── Craft: 유튜브 쇼츠(세로 9:16) 코버플로우 캐러셀 ──
+   가운데 카드만 iframe으로 재생(음소거 자동재생·반복), 양옆은 썸네일 미리보기.
+   섹션이 화면에 들어온 뒤에야 플레이어를 로드해 불필요한 로딩을 줄임. */
+function CraftShorts() {
+  // 슬라이드 = 쇼츠 N개 + 마지막 구독 엔드카드 1개
+  const total = SHORTS.length + 1;
+  const REPEAT = 3; // 무한 루프용으로 목록을 3벌 복제해 렌더
+  const positions = total * REPEAT;
 
+  const [index, setIndex] = useState(total); // 가운데 복제본의 첫 카드에서 시작
+  const [noAnim, setNoAnim] = useState(true); // 최초 위치 잡을 땐 애니메이션 off
+  const [inView, setInView] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  const activeReal = ((index % total) + total) % total;
+
+  // 활성 카드를 컨테이너 정중앙에 맞춤 (index/resize 시 재계산).
+  // 실제 화면 좌표(getBoundingClientRect)로 현재 위치와의 차이만큼 보정 →
+  // 컨테이너 패딩(px-6)과 무관하게 정확히 가운데 정렬.
   useEffect(() => {
-    const v = ref.current;
-    if (!v) return;
-    v.muted = true;
-    const reduce = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const compute = () => {
+      const track = trackRef.current;
+      const card = track?.children[index] as HTMLElement | undefined;
+      const container = track?.parentElement;
+      if (!track || !card || !container) return;
+      const c = container.getBoundingClientRect();
+      const k = card.getBoundingClientRect();
+      const delta = c.left + c.width / 2 - (k.left + k.width / 2);
+      setOffset((prev) => prev + delta);
+    };
+    compute();
+    window.addEventListener("resize", compute);
+    return () => window.removeEventListener("resize", compute);
+  }, [index]);
+
+  // Defer loading the YouTube player until the section is scrolled into view.
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
     const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !reduce) {
-          v.play().catch(() => {});
-        } else {
-          v.pause();
-        }
-      },
-      { threshold: 0.4 },
+      ([e]) => e.isIntersecting && setInView(true),
+      { threshold: 0.25 },
     );
-    io.observe(v);
+    io.observe(el);
     return () => io.disconnect();
   }, []);
 
-  const togglePlay = () => {
-    const v = ref.current;
-    if (!v) return;
-    if (v.paused) v.play().catch(() => {});
-    else v.pause();
+  // 무애니메이션 스냅 후 다음 프레임에 애니메이션 복구.
+  useEffect(() => {
+    if (!noAnim) return;
+    const id = requestAnimationFrame(() =>
+      requestAnimationFrame(() => setNoAnim(false)),
+    );
+    return () => cancelAnimationFrame(id);
+  }, [noAnim]);
+
+  // 이동이 끝나면 가운데 복제본 범위로 조용히 되돌림 → 무한 루프.
+  const settle = () => {
+    if (index < total) {
+      setNoAnim(true);
+      setIndex(index + total);
+    } else if (index >= total * 2) {
+      setNoAnim(true);
+      setIndex(index - total);
+    }
   };
 
-  const toggleMute = () => {
-    const v = ref.current;
-    if (!v) return;
-    v.muted = !v.muted;
-    setMuted(v.muted);
+  const go = (d: number) => setIndex((x) => x + d);
+  const goTo = (real: number) => {
+    let delta = real - activeReal;
+    if (delta > total / 2) delta -= total; // 더 가까운 방향으로 회전
+    if (delta < -total / 2) delta += total;
+    setIndex((x) => x + delta);
   };
 
   return (
-    <div className="relative w-full">
-      {/* placeholder shown behind until a real video file is added to /public */}
-      <div className="ph absolute inset-0" />
-      <video
-        ref={ref}
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-        className="relative z-10 aspect-[21/9] w-full object-cover"
-        muted
-        loop
-        playsInline
-        preload="metadata"
-      >
-        {/* TEMP: 오픈 라이선스 샘플 영상. 실제 영상은 /public/craft.mp4 넣고 아래 두 source를 이걸로 교체: <source src="/craft.mp4" type="video/mp4" /> */}
-        <source
-          src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
-          type="video/mp4"
-        />
-        <source
-          src="https://mdn.github.io/shared-assets/videos/flower.mp4"
-          type="video/mp4"
-        />
-      </video>
+    <div ref={rootRef} className="relative w-full">
+      <div className="overflow-hidden px-6 py-4">
+        <div
+          ref={trackRef}
+          onTransitionEnd={(e) => {
+            if (e.target === e.currentTarget && e.propertyName === "transform")
+              settle();
+          }}
+          className={`relative flex items-center gap-4 sm:gap-6 ${
+            noAnim ? "" : "transition-transform duration-500 ease-out"
+          }`}
+          style={{ transform: `translateX(${offset}px)` }}
+        >
+          {Array.from({ length: positions }).map((_, pos) => {
+            const real = pos % total;
+            const isActive = pos === index;
 
-      {/* left-bottom: play / pause */}
+            // 마지막 real 인덱스 = 구독 엔드카드
+            if (real === SHORTS.length) {
+              return (
+                <div
+                  key={pos}
+                  onClick={() => setIndex(pos)}
+                  className={`relative flex aspect-[9/16] w-[74vw] max-w-[300px] shrink-0 cursor-pointer flex-col items-center justify-center gap-5 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-[#1c1c20] to-[#0a0a0b] px-6 text-center transition-all duration-500 sm:w-[300px] ${
+                    isActive
+                      ? "scale-100 opacity-100 shadow-2xl shadow-black/50"
+                      : "scale-90 opacity-40 hover:opacity-70"
+                  }`}
+                >
+                  <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#FF0000] text-white">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="h-9 w-9"
+                    >
+                      <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.5 15.5v-7l6.3 3.5-6.3 3.5Z" />
+                    </svg>
+                  </span>
+                  <div>
+                    <h3 className="text-xl font-semibold">특장맨 유튜브</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+                      구독하고 더 많은
+                      <br />
+                      제작 영상을 만나보세요!
+                    </p>
+                  </div>
+                  <a
+                    href={YOUTUBE_CHANNEL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="rounded-full bg-[#FF0000] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                  >
+                    구독하러 가기 →
+                  </a>
+                </div>
+              );
+            }
+
+            const s = SHORTS[real];
+            return (
+              <button
+                type="button"
+                key={pos}
+                onClick={() => setIndex(pos)}
+                aria-label={s.title}
+                className={`relative aspect-[9/16] w-[74vw] max-w-[300px] shrink-0 cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e10] transition-all duration-500 sm:w-[300px] ${
+                  isActive
+                    ? "scale-100 opacity-100 shadow-2xl shadow-black/50"
+                    : "scale-90 opacity-40 hover:opacity-70"
+                }`}
+              >
+                {isActive && inView ? (
+                  <iframe
+                    src={`https://www.youtube-nocookie.com/embed/${s.id}?autoplay=1&mute=1&loop=1&playlist=${s.id}&controls=1&playsinline=1&rel=0&modestbranding=1`}
+                    title={s.title}
+                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                    className="absolute inset-0 h-full w-full"
+                  />
+                ) : (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`https://i.ytimg.com/vi/${s.id}/hqdefault.jpg`}
+                      alt={s.title}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/30" />
+                    <span className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 pl-1 text-white backdrop-blur-sm">
+                      ▶
+                    </span>
+                  </>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* prev / next (무한 루프 → 항상 활성) */}
       <button
-        onClick={togglePlay}
-        aria-label={playing ? "일시정지" : "재생"}
-        className="absolute bottom-5 left-5 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70 sm:bottom-8 sm:left-8"
+        type="button"
+        onClick={() => go(-1)}
+        aria-label="이전 영상"
+        className="absolute left-4 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/60 text-xl text-white backdrop-blur-sm transition-colors hover:bg-black/80 sm:left-8"
       >
-        <span className={playing ? "text-sm" : "ml-0.5 text-sm"}>
-          {playing ? "❚❚" : "▶"}
-        </span>
+        ‹
+      </button>
+      <button
+        type="button"
+        onClick={() => go(1)}
+        aria-label="다음 영상"
+        className="absolute right-4 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/60 text-xl text-white backdrop-blur-sm transition-colors hover:bg-black/80 sm:right-8"
+      >
+        ›
       </button>
 
-      {/* right-bottom: sound / mute (default muted) */}
-      <button
-        onClick={toggleMute}
-        aria-label={muted ? "소리 켜기" : "소리 끄기"}
-        className="absolute bottom-5 right-5 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70 sm:bottom-8 sm:right-8"
-      >
-        {muted ? "🔇" : "🔊"}
-      </button>
+      {/* dots (마지막 = 구독 엔드카드) */}
+      <div className="mt-6 flex justify-center gap-2">
+        {Array.from({ length: total }).map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => goTo(i)}
+            aria-label={
+              i === SHORTS.length ? "유튜브 구독 카드" : `${i + 1}번째 영상`
+            }
+            className={`h-1.5 cursor-pointer rounded-full transition-all ${
+              i === activeReal
+                ? i === SHORTS.length
+                  ? "w-8 bg-[#FF0000]"
+                  : "w-8 bg-white"
+                : "w-1.5 bg-white/30"
+            }`}
+          />
+        ))}
+      </div>
     </div>
   );
 }
