@@ -71,8 +71,12 @@ html.lenis body {
   }
 }
 
-/* 라인업 패널(버튼)은 클릭 가능 → 손가락 커서 */
-button.ph {
+/* Tailwind v4 의 preflight 는 버튼에 cursor 를 지정하지 않는다 → 브라우저 기본값(화살표).
+   클릭 가능한 요소는 손가락 커서가 맞으므로 한 곳에서 지정한다.
+   비활성 버튼은 제외 (disabled:cursor-not-allowed 같은 유틸리티가 그대로 동작). */
+button:not(:disabled),
+[role="button"]:not(:disabled),
+summary {
   cursor: pointer;
 }
 

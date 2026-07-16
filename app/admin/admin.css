@@ -1,0 +1,244 @@
+/* 관리자 전용 스타일 — 메인 랜딩(app/HomeClient.tsx)의 디자인 언어에 맞춘 다크 테마.
+   토큰은 .admin-scope 안으로만 한정한다.
+
+   랜딩에서 가져온 값:
+     페이지 #0a0a0b · 카드 #0e0e10 · 테두리 white/10 · 입력 black/30 + white/15
+     텍스트 white → zinc-300 → zinc-400 → zinc-500
+     주 버튼 = 흰 배경 + 검은 글씨 + rounded-full
+   폰트는 지정하지 않는다 → 루트 레이아웃의 Geist 스택을 그대로 상속(랜딩과 동일). */
+
+.admin-scope {
+  /* ── 표면 ── */
+  --bg: #0a0a0b;
+  --bg-secondary: #0a0a0b;
+  --surface: #0e0e10;
+  --surface-hover: rgba(255, 255, 255, 0.03);
+  --surface-sunken: rgba(0, 0, 0, 0.3);
+
+  /* ── 테두리 ── */
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+
+  /* ── 텍스트 (zinc 스케일) ── */
+  --text: #ffffff;
+  --text-secondary: #d4d4d8;
+  --text-muted: #71717a;
+
+  /* ── 액센트: 랜딩의 주 버튼은 흰색이다 ── */
+  --accent: #ffffff;
+  --accent-fg: #0a0a0b;
+  --accent-hover: #e4e4e7;
+  --accent-light: rgba(255, 255, 255, 0.1);
+
+  /* ── 상태색: 랜딩의 유일한 유채색이 카카오 옐로(#FEE500)라 그 계열로 맞춤 ── */
+  --amber: #fbbf24;
+  --amber-bg: rgba(251, 191, 36, 0.12);
+  --amber-border: rgba(251, 191, 36, 0.35);
+  --emerald: #34d399;
+  --emerald-bg: rgba(52, 211, 153, 0.12);
+  --emerald-border: rgba(52, 211, 153, 0.35);
+  --danger: #f87171;
+  --danger-border: rgba(248, 113, 113, 0.4);
+
+  --radius-md: 12px;
+  --radius-xl: 16px;
+
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── 타이포 ── */
+/* 랜딩의 스케일을 따른다: 카드 제목 text-lg(1.125) · 본문 text-sm(0.875) · 메타 text-xs(0.75) */
+.admin-scope .title-2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  color: var(--text);
+}
+.admin-scope .title-3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  color: var(--text);
+}
+.admin-scope .subhead {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.admin-scope .footnote {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+.admin-scope .caption-1 {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+.admin-scope .emphasized {
+  font-weight: 700;
+}
+.admin-scope .semibold {
+  font-weight: 600;
+}
+.admin-scope .medium {
+  font-weight: 500;
+}
+.admin-scope .c-accent {
+  color: var(--text-secondary);
+  letter-spacing: 0.35em; /* 랜딩의 eyebrow(GET IN TOUCH) 스타일 */
+  text-transform: uppercase;
+}
+
+/* ── 폼: 랜딩의 문의 폼과 동일 (bg-black/30, border-white/15, rounded-xl) ── */
+.admin-scope .form-input {
+  width: 100%;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text);
+  font-family: inherit;
+  transition: border-color 0.15s;
+  outline: none;
+}
+.admin-scope .form-input:focus {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.admin-scope .form-input::placeholder {
+  color: var(--text-muted);
+}
+.admin-scope textarea.form-input {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+.admin-scope select.form-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  padding-right: 2.25rem;
+  cursor: pointer;
+}
+
+/* ── 주 버튼: 랜딩의 '문의 남기기' 와 동일 ── */
+.admin-scope .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.85rem 2rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color 0.15s, opacity 0.15s;
+  border: none;
+  text-decoration: none;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.admin-scope .btn-primary:hover {
+  background: var(--accent-hover);
+}
+.admin-scope .btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── 레이아웃 ── */
+.admin-wrap {
+  display: flex;
+  flex-direction: row;
+}
+.admin-sidebar {
+  width: 264px;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  overflow-y: auto;
+}
+.admin-stat-card {
+  transition: border-color 0.15s ease;
+}
+.admin-stat-card:hover {
+  border-color: var(--border-strong) !important;
+}
+.admin-row td {
+  transition: background 0.12s ease;
+}
+.admin-row:hover td {
+  background: var(--surface-hover);
+}
+/* 탭마다 카드 수가 다르다(전체 현황 4개, 공지·FAQ 2개).
+   auto-fit 은 빈 트랙을 접으므로 카드 수에 맞춰 균등 분할된다. */
+.stat-grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+.spin {
+  animation: admin-spin 0.8s linear infinite;
+}
+@keyframes admin-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.detail-dl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+  .admin-wrap {
+    flex-direction: column;
+  }
+  .admin-sidebar {
+    display: none !important;
+  }
+  .admin-mobile-header {
+    display: flex !important;
+  }
+  .admin-overlay {
+    display: block !important;
+  }
+  .admin-drawer {
+    display: flex !important;
+  }
+  .stat-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .admin-main {
+    padding: 1.25rem 1rem 5rem !important;
+  }
+  .refresh-label {
+    display: none;
+  }
+  .admin-refresh-btn {
+    padding: 0.35rem 0.6rem !important;
+  }
+  /* 모바일: 16px 미만이면 iOS Safari 가 자동 줌인 → 16px 고정 */
+  .admin-scope .form-input {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .detail-dl {
+    grid-template-columns: 1fr;
+  }
+}
