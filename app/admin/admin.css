@@ -203,6 +203,27 @@
   font-size: 0.95rem;
 }
 
+/* 통계·유입 탭 레이아웃 */
+.analytics-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+@media (max-width: 900px) {
+  .analytics-2col {
+    grid-template-columns: 1fr;
+  }
+}
+/* 지표 카드 3개 — auto-fit 이라 개수가 바뀌어도 균등 분할된다 */
+.traffic-metric-grid {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+@media (max-width: 900px) {
+  .traffic-metric-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .admin-wrap {
     flex-direction: column;
