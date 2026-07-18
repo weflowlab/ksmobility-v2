@@ -257,16 +257,6 @@ export const GALLERY: string[][] = [
     "/products/08/025.jpg",
     "/products/08/026.jpg",
     "/products/08/027.jpg",
-    "/products/08/028.jpg",
-    "/products/08/029.jpg",
-    "/products/08/030.jpg",
-    "/products/08/031.jpg",
-    "/products/08/032.jpg",
-    "/products/08/033.jpg",
-    "/products/08/034.jpg",
-    "/products/08/035.jpg",
-    "/products/08/036.jpg",
-    "/products/08/037.jpg",
-    "/products/08/038.jpg"
+    "/products/08/028.jpg"
   ]
 ];
