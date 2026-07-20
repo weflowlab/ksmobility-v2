@@ -48,6 +48,12 @@ export const metadata: Metadata = {
     description: SITE_DESC,
     images: ["/og.jpg"],
   },
+  // 검색엔진 소유확인 — 네이버 서치어드바이저(웹마스터 도구)
+  verification: {
+    other: {
+      "naver-site-verification": "c61a7567da559187436e4f6f4dcde3a0a06f4101",
+    },
+  },
 };
 
 export default function RootLayout({
