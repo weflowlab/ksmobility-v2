@@ -146,6 +146,15 @@ function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
+// 받침 유무에 따른 서술격 조사 — "직접 유입이에요" / "네이버예요"
+// 한글 음절(가~힣)에서 (코드 - 0xAC00) % 28 이 0 이 아니면 받침이 있다.
+function josaIeyo(word: string): string {
+  const last = word.trim().slice(-1);
+  const code = last.charCodeAt(0);
+  if (code < 0xac00 || code > 0xd7a3) return "예요"; // 한글이 아니면(도메인 등) 기본값
+  return (code - 0xac00) % 28 !== 0 ? "이에요" : "예요";
+}
+
 // 상태 분포 막대의 구간 색 (다크 테마 토큰과 동일 계열)
 const STATUS_SEG: { key: Status; label: string; color: string }[] = [
   { key: "pending", label: "대기", color: "#71717a" },
@@ -1094,8 +1103,8 @@ const CARD: React.CSSProperties = {
 };
 const H3: React.CSSProperties = {
   margin: 0,
-  fontSize: "1.125rem",
-  fontWeight: 600,
+  fontSize: "1.25rem",
+  fontWeight: 700,
   color: "var(--text)",
 };
 
@@ -1788,7 +1797,7 @@ function TrafficMetric({
           style={{
             color: "var(--text-secondary)",
             margin: 0,
-            fontSize: "0.75rem",
+            fontSize: "0.9rem",
             wordBreak: "keep-all",
           }}
         >
@@ -1799,7 +1808,7 @@ function TrafficMetric({
         style={{
           margin: 0,
           lineHeight: 1.05,
-          fontSize: "1.75rem",
+          fontSize: "2.25rem",
           fontWeight: 800,
           letterSpacing: "-0.03em",
           color: "var(--text)",
@@ -1810,8 +1819,8 @@ function TrafficMetric({
       {sub && (
         <p
           style={{
-            margin: "0.45rem 0 0",
-            fontSize: "0.75rem",
+            margin: "0.5rem 0 0",
+            fontSize: "0.82rem",
             color: "var(--text-muted)",
           }}
         >
@@ -1861,8 +1870,8 @@ function SectionHead({
         <h3 style={H3}>{title}</h3>
         <p
           style={{
-            margin: "0.2rem 0 0",
-            fontSize: "0.75rem",
+            margin: "0.25rem 0 0",
+            fontSize: "0.85rem",
             color: "var(--text-muted)",
             wordBreak: "keep-all",
           }}
@@ -1891,8 +1900,8 @@ function BarRow({
     <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
       <span
         style={{
-          flex: "0 0 92px",
-          fontSize: "0.75rem",
+          flex: "0 0 100px",
+          fontSize: "0.875rem",
           color: "var(--text-secondary)",
           wordBreak: "keep-all",
         }}
@@ -1902,7 +1911,7 @@ function BarRow({
       <div
         style={{
           flex: 1,
-          height: 18,
+          height: 20,
           borderRadius: 5,
           background: "rgba(255,255,255,0.06)",
           overflow: "hidden",
@@ -1919,9 +1928,9 @@ function BarRow({
       </div>
       <span
         style={{
-          flex: "0 0 78px",
+          flex: "0 0 92px",
           textAlign: "right",
-          fontSize: "0.875rem",
+          fontSize: "0.95rem",
           fontWeight: 700,
           color: "var(--text)",
         }}
@@ -1989,6 +1998,12 @@ function TrafficView({
 
   const sourceRows = Object.entries(sourceCount).sort((a, b) => b[1] - a[1]);
   const maxSource = Math.max(1, ...sourceRows.map((r) => r[1]));
+  // 요약 배너용 1위 유입 경로 (정렬돼 있으므로 첫 항목)
+  const topSource = sourceRows[0];
+  const topSourceName = topSource ? SOURCE_KO[topSource[0]] || topSource[0] : "";
+  const topSourcePct = topSource
+    ? Math.round((topSource[1] / totalSessions) * 100)
+    : 0;
   const deviceRows = Object.entries(deviceCount).sort((a, b) => b[1] - a[1]);
 
   // 일별 방문(세션 수) — 최근 14일
@@ -2020,24 +2035,22 @@ function TrafficView({
   });
   const maxHour = Math.max(1, ...hours);
 
-  // 스크롤 도달 퍼널 — max_scroll 기록된 페이지뷰 기준
-  const scrolled = pageViews.filter((v) => v.maxScroll != null);
-  const scrollTotal = scrolled.length;
-  // 라벨은 퍼센트를 쓰지 않는다 — 옆에 나오는 '방문자 비율 %' 와 헷갈린다.
-  // (예: "25% 지점 … 81%" → 두 숫자가 각각 뭔지 알 수 없음)
-  const scrollReach = [
-    { t: 25, label: "1/4까지" },
-    { t: 50, label: "절반까지" },
-    { t: 75, label: "3/4까지" },
-    { t: 100, label: "끝까지" },
-  ].map((s) => ({
-    ...s,
-    n: scrolled.filter((v) => (v.maxScroll as number) >= s.t).length,
-  }));
+  // '평균 스크롤 도달' 지표용 — 다른 지표(방문자·유입경로·기기)와 같은
+  // '방문자(세션)' 단위로 센다. 한 방문자가 여러 페이지를 봤으면 그중 가장
+  // 깊이 내려간 값을 그 사람의 기록으로 쓴다.
+  // 스크롤 값은 방문자가 페이지를 떠날 때만 전송되므로(PageTracker.flush),
+  // 아직 보고 있는 중이거나 전송이 실패한 방문은 기록이 없어 분모에서 빠진다.
+  const sessionScroll = sessionList
+    .map((views) => {
+      const vals = views
+        .map((v) => v.maxScroll)
+        .filter((m): m is number => m != null);
+      return vals.length ? Math.max(...vals) : null;
+    })
+    .filter((m): m is number => m != null);
+  const scrollTotal = sessionScroll.length;
   const avgScroll = scrollTotal
-    ? Math.round(
-        scrolled.reduce((a, v) => a + (v.maxScroll as number), 0) / scrollTotal,
-      )
+    ? Math.round(sessionScroll.reduce((a, m) => a + m, 0) / scrollTotal)
     : 0;
 
   if (loading && allPageViews.length === 0) {
@@ -2108,9 +2121,9 @@ function TrafficView({
         <TrafficMetric
           Icon={Users}
           tint="#34d399"
-          label="방문자"
+          label="방문자 수"
           value={String(totalSessions)}
-          sub="페이지에 방문한 고객 수"
+          sub="선택 기간 방문 고객"
         />
         <TrafficMetric
           Icon={ChevronsDown}
@@ -2122,63 +2135,54 @@ function TrafficView({
         <TrafficMetric
           Icon={Clock}
           tint="#fbbf24"
-          label="평균 체류시간"
+          label="평균 머문 시간"
           value={durN ? fmtDur(avgDur) : "-"}
-          sub="고객이 페이지에 머문 시간"
+          sub="한 명이 머문 평균 시간"
         />
       </div>
 
-      {/* 일별 방문자 */}
-      <section style={CARD}>
-        <SectionHead
-          Icon={TrendingUp}
-          tint="#34d399"
-          title="방문자 추이"
-          desc="최근 14일 일별 방문자 수 (기간 선택과 무관하게 14일 고정)"
-        />
-        <div style={{ display: "flex", alignItems: "flex-end", gap: "0.4rem" }}>
-          {days.map((d) => (
-            <div
-              key={d.key}
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "0.35rem",
-              }}
-              title={`${d.label} · 방문자 ${d.v}명`}
-            >
-              <span style={{ fontSize: "0.68rem", color: "var(--text-muted)" }}>
-                {d.v || ""}
-              </span>
-              {/* 막대 전용 영역. 높이를 여기서 고정해야 자식의 % 높이가 계산된다.
-                  (부모 높이가 불확정이면 % → auto 로 무너져 모든 막대가 같아진다) */}
-              <div
-                style={{
-                  width: "100%",
-                  height: 90,
-                  display: "flex",
-                  alignItems: "flex-end",
-                }}
-              >
-                <div
-                  style={{
-                    width: "100%",
-                    height: `${(d.v / maxDay) * 100}%`,
-                    minHeight: d.v ? 3 : 0,
-                    background: "#34d399",
-                    borderRadius: "3px 3px 0 0",
-                  }}
-                />
-              </div>
-              <span style={{ fontSize: "0.62rem", color: "var(--text-muted)" }}>
-                {d.label}
-              </span>
-            </div>
-          ))}
+      {/* 요약 한 줄 — 화면을 열자마자 핵심(1위 유입 경로)이 읽히도록 */}
+      {topSource && (
+        <div
+          style={{
+            ...CARD,
+            display: "flex",
+            alignItems: "center",
+            gap: "0.85rem",
+          }}
+        >
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "2.6rem",
+              height: "2.6rem",
+              flex: "none",
+              borderRadius: "0.7rem",
+              background: "rgba(52, 211, 153, 0.12)",
+              color: "#34d399",
+            }}
+          >
+            <TrendingUp size={22} />
+          </span>
+          <p
+            style={{
+              margin: 0,
+              fontSize: "1.05rem",
+              fontWeight: 500,
+              color: "var(--text-secondary)",
+              lineHeight: 1.5,
+              wordBreak: "keep-all",
+            }}
+          >
+            고객이 가장 많이 들어온 곳은{" "}
+            <b style={{ color: "#34d399" }}>{topSourceName}</b>
+            {josaIeyo(topSourceName)} — 전체 방문자의{" "}
+            <b style={{ color: "var(--text)" }}>{topSourcePct}%</b>
+          </p>
         </div>
-      </section>
+      )}
 
       <div className="analytics-2col">
         {/* 유입 경로 */}
@@ -2186,8 +2190,8 @@ function TrafficView({
           <SectionHead
             Icon={LogIn}
             tint="#38bdf8"
-            title="어디서 왔나요?"
-            desc="방문자가 사이트로 들어온 경로"
+            title="어디서 들어왔나요?"
+            desc="고객들이 우리 사이트를 찾은 경로"
           />
           <div
             style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}
@@ -2199,14 +2203,14 @@ function TrafficView({
                 color={SOURCE_COLOR[src] || "#94a3b8"}
                 value={n}
                 max={maxSource}
-                right={`${n}명 · ${Math.round((n / totalSessions) * 100)}%`}
+                right={`${n}명 (${Math.round((n / totalSessions) * 100)}%)`}
               />
             ))}
             {sourceRows.length === 0 && (
               <p
                 style={{
                   margin: 0,
-                  fontSize: "0.75rem",
+                  fontSize: "0.85rem",
                   color: "var(--text-muted)",
                 }}
               >
@@ -2222,7 +2226,7 @@ function TrafficView({
             Icon={Smartphone}
             tint="#a78bfa"
             title="무엇으로 봤나요?"
-            desc="방문에 사용한 기기"
+            desc="휴대폰·컴퓨터 등 접속 기기"
           />
           <div
             style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}
@@ -2234,14 +2238,14 @@ function TrafficView({
                 color={DEVICE_COLOR[dev] || "#94a3b8"}
                 value={n}
                 max={Math.max(1, ...deviceRows.map((r) => r[1]))}
-                right={`${n}명 · ${Math.round((n / totalSessions) * 100)}%`}
+                right={`${n}명 (${Math.round((n / totalSessions) * 100)}%)`}
               />
             ))}
             {deviceRows.length === 0 && (
               <p
                 style={{
                   margin: 0,
-                  fontSize: "0.75rem",
+                  fontSize: "0.85rem",
                   color: "var(--text-muted)",
                 }}
               >
@@ -2252,15 +2256,70 @@ function TrafficView({
         </section>
       </div>
 
-      <div className="analytics-2col">
-        {/* 시간대별 */}
-        <section style={CARD}>
-          <SectionHead
-            Icon={Clock}
-            tint="#fbbf24"
-            title="언제 많이 오나요?"
-            desc="하루 중 방문이 몰리는 시간대 (0~23시)"
-          />
+      {/* 일별 방문자 — WEFLOW 관리자와 같은 순서로 유입/기기 2열 아래에 둔다 */}
+      <section style={CARD}>
+        <SectionHead
+          Icon={TrendingUp}
+          tint="#34d399"
+          title="날짜별 방문자"
+          desc="최근 14일 동안 하루에 몇 명이 왔는지"
+        />
+        <div style={{ display: "flex", alignItems: "flex-end", gap: "0.4rem" }}>
+          {days.map((d) => (
+            <div
+              key={d.key}
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "0.35rem",
+              }}
+              title={`${d.label} · 방문자 ${d.v}명`}
+            >
+              <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
+                {d.v || ""}
+              </span>
+              {/* 막대 전용 영역. 높이를 여기서 고정해야 자식의 % 높이가 계산된다.
+                  (부모 높이가 불확정이면 % → auto 로 무너져 모든 막대가 같아진다) */}
+              <div
+                style={{
+                  width: "100%",
+                  height: 130,
+                  display: "flex",
+                  alignItems: "flex-end",
+                  justifyContent: "center",
+                }}
+              >
+                {/* 칸 폭을 다 채우면 막대가 뚱뚱해 보인다 — 절반 정도만 쓰고
+                    화면이 넓어져도 maxWidth 로 더 굵어지지 않게 막는다. */}
+                <div
+                  style={{
+                    width: "52%",
+                    maxWidth: 46,
+                    height: `${(d.v / maxDay) * 100}%`,
+                    minHeight: d.v ? 3 : 0,
+                    background: "#34d399",
+                    borderRadius: "4px 4px 0 0",
+                  }}
+                />
+              </div>
+              <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>
+                {d.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 시간대별 — 24칸 막대라 좁으면 눈금이 뭉개진다. '날짜별 방문자'와 같은 전체 폭. */}
+      <section style={CARD}>
+        <SectionHead
+          Icon={Clock}
+          tint="#fbbf24"
+          title="언제 많이 오나요?"
+          desc="하루 중 방문이 몰리는 시간대 (0~23시)"
+        />
           {/* 라벨을 막대와 같은 24칸 안에 넣는다. 바깥에서 space-between 으로
               흩뿌리면 24칸 그리드와 기준이 달라 눈금이 막대와 어긋난다. */}
           <div style={{ display: "flex", alignItems: "flex-end", gap: 2 }}>
@@ -2306,7 +2365,7 @@ function TrafficView({
                   style={{
                     height: 12,
                     lineHeight: "12px",
-                    fontSize: "0.62rem",
+                    fontSize: "0.72rem",
                     color: "var(--text-muted)",
                     whiteSpace: "nowrap",
                   }}
@@ -2316,48 +2375,7 @@ function TrafficView({
               </div>
             ))}
           </div>
-        </section>
-
-        {/* 스크롤 도달률 */}
-        <section style={CARD}>
-          <SectionHead
-            Icon={ChevronsDown}
-            tint="#38bdf8"
-            title="어디까지 봤나요?"
-            desc="방문자가 페이지를 나간 위치"
-          />
-          {scrollTotal === 0 ? (
-            <p
-              style={{
-                margin: 0,
-                fontSize: "0.75rem",
-                color: "var(--text-muted)",
-              }}
-            >
-              아직 스크롤 데이터가 없습니다.
-            </p>
-          ) : (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.85rem",
-              }}
-            >
-              {scrollReach.map(({ t, label, n }) => (
-                <BarRow
-                  key={t}
-                  label={label}
-                  color="#38bdf8"
-                  value={n}
-                  max={scrollTotal}
-                  right={`${n}명 · ${Math.round((n / scrollTotal) * 100)}%`}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
+      </section>
     </div>
   );
 }
