@@ -1957,6 +1957,15 @@ function TrafficView({
   period: string;
   onPeriodChange: (p: string) => void;
 }) {
+  // 날짜별 방문자 차트 가로 스크롤 — 모바일에서 14칸을 다 그리면 뭉개지므로
+  // 최소 폭을 주고 옆으로 밀어서 보게 한다. 열었을 때 최신 날짜가 먼저 보이도록
+  // 오른쪽 끝으로 스크롤해 둔다. (훅이라 아래 조기 return 보다 위에 있어야 한다)
+  const dailyScrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = dailyScrollRef.current;
+    if (el) el.scrollLeft = el.scrollWidth;
+  }, [allPageViews]);
+
   const pageViews = withinPeriod(allPageViews, period);
 
   // 세션 단위로 묶기
@@ -2264,51 +2273,63 @@ function TrafficView({
           title="날짜별 방문자"
           desc="최근 14일 동안 하루에 몇 명이 왔는지"
         />
-        <div style={{ display: "flex", alignItems: "flex-end", gap: "0.4rem" }}>
-          {days.map((d) => (
-            <div
-              key={d.key}
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "0.35rem",
-              }}
-              title={`${d.label} · 방문자 ${d.v}명`}
-            >
-              <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                {d.v || ""}
-              </span>
-              {/* 막대 전용 영역. 높이를 여기서 고정해야 자식의 % 높이가 계산된다.
-                  (부모 높이가 불확정이면 % → auto 로 무너져 모든 막대가 같아진다) */}
+        <div
+          ref={dailyScrollRef}
+          style={{ overflowX: "auto", overflowY: "hidden" }}
+        >
+          {/* minWidth 로 14칸의 최소 폭을 확보한다. 좁은 화면에서는 이 폭을
+              넘겨 가로 스크롤이 생기고, 넓은 화면에서는 flex 로 꽉 찬다. */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-end",
+              gap: "0.5rem",
+              height: 160,
+              minWidth: 620,
+            }}
+          >
+            {days.map((d) => (
               <div
+                key={d.key}
                 style={{
-                  width: "100%",
-                  height: 130,
+                  flex: 1,
                   display: "flex",
-                  alignItems: "flex-end",
-                  justifyContent: "center",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "0.4rem",
+                  height: "100%",
+                  justifyContent: "flex-end",
                 }}
               >
-                {/* 칸 폭을 다 채우면 막대가 뚱뚱해 보인다 — 절반 정도만 쓰고
-                    화면이 넓어져도 maxWidth 로 더 굵어지지 않게 막는다. */}
-                <div
+                <span
                   style={{
-                    width: "52%",
-                    maxWidth: 46,
+                    fontSize: "0.72rem",
+                    fontWeight: 700,
+                    color: "var(--text-secondary)",
+                  }}
+                >
+                  {d.v || ""}
+                </span>
+                <div
+                  title={`${d.label} · ${d.v}명`}
+                  style={{
+                    width: "100%",
+                    maxWidth: 34,
                     height: `${(d.v / maxDay) * 100}%`,
-                    minHeight: d.v ? 3 : 0,
+                    minHeight: d.v ? 4 : 0,
                     background: "#34d399",
-                    borderRadius: "4px 4px 0 0",
+                    borderRadius: "5px 5px 0 0",
+                    transition: "height 0.2s",
                   }}
                 />
+                <span
+                  style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}
+                >
+                  {d.label}
+                </span>
               </div>
-              <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>
-                {d.label}
-              </span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
