@@ -2275,6 +2275,7 @@ function TrafficView({
         />
         <div
           ref={dailyScrollRef}
+          className="no-scrollbar"
           style={{ overflowX: "auto", overflowY: "hidden" }}
         >
           {/* minWidth 로 14칸의 최소 폭을 확보한다. 좁은 화면에서는 이 폭을

@@ -218,6 +218,16 @@
 .traffic-metric-grid {
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
 }
+
+/* 가로 스크롤은 그대로 두고 스크롤바만 숨긴다 (날짜별 방문자 차트).
+   ::-webkit-scrollbar 는 의사요소라 인라인 style 로는 지정할 수 없어 여기 둔다. */
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* 구형 Edge/IE */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome · Safari */
+}
 @media (max-width: 900px) {
   .traffic-metric-grid {
     grid-template-columns: repeat(2, 1fr);
