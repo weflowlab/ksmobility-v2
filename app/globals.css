@@ -27,11 +27,6 @@ body {
   overflow: hidden;
 }
 
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 /* Lenis smooth scroll (recommended base styles) */
 html.lenis,
 html.lenis body {
@@ -87,29 +82,4 @@ summary {
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
-}
-
-/* Animated nav underline */
-.nav-link {
-  position: relative;
-  transition: color 0.2s;
-}
-.nav-link::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -4px;
-  height: 1px;
-  width: 100%;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.nav-link:hover {
-  color: #fff;
-}
-.nav-link:hover::after {
-  transform: scaleX(1);
-  transform-origin: left;
 }

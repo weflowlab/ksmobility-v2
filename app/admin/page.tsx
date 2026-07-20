@@ -1940,11 +1940,14 @@ function BarRow({
 function TrafficView({
   pageViews: allPageViews,
   loading,
+  period,
+  onPeriodChange,
 }: {
   pageViews: PageView[];
   loading: boolean;
+  period: string;
+  onPeriodChange: (p: string) => void;
 }) {
-  const [period, setPeriod] = useState("today");
   const pageViews = withinPeriod(allPageViews, period);
 
   // 세션 단위로 묶기
@@ -2048,25 +2051,45 @@ function TrafficView({
     );
   }
   if (!loading && allPageViews.length === 0) {
+    // 기간 선택은 여기서도 반드시 그린다. 선택한 기간에 기록이 없다고 드롭다운까지
+    // 숨기면, 더 넓은 기간('전체')으로 되돌릴 방법이 없어 갇힌다.
     return (
-      <div style={CARD}>
-        <p
-          className="subhead"
-          style={{
-            color: "var(--text-muted)",
-            margin: 0,
-            textAlign: "center",
-            lineHeight: 1.7,
-          }}
-        >
-          아직 방문 기록이 없습니다.
-          <br />
-          방문 집계는{" "}
-          <b style={{ color: "var(--text-secondary)" }}>커스텀 도메인</b> 연결
-          후부터 쌓입니다.
-          <br />
-          (로컬 개발과 vercel.app 주소는 테스트 트래픽이라 집계에서 제외됩니다)
-        </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <PeriodSelect value={period} onChange={onPeriodChange} />
+        </div>
+        <div style={CARD}>
+          <p
+            className="subhead"
+            style={{
+              color: "var(--text-muted)",
+              margin: 0,
+              textAlign: "center",
+              lineHeight: 1.7,
+            }}
+          >
+            {period === "all" ? (
+              <>
+                아직 방문 기록이 없습니다.
+                <br />
+                방문 집계는{" "}
+                <b style={{ color: "var(--text-secondary)" }}>커스텀 도메인</b>{" "}
+                연결 후부터 쌓입니다.
+                <br />
+                (로컬 개발과 vercel.app 주소는 테스트 트래픽이라 집계에서
+                제외됩니다)
+              </>
+            ) : (
+              <>
+                이 기간에는 방문 기록이 없습니다.
+                <br />
+                위에서 기간을{" "}
+                <b style={{ color: "var(--text-secondary)" }}>전체</b> 로 바꿔
+                보세요.
+              </>
+            )}
+          </p>
+        </div>
       </div>
     );
   }
@@ -2074,7 +2097,7 @@ function TrafficView({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-        <PeriodSelect value={period} onChange={setPeriod} />
+        <PeriodSelect value={period} onChange={onPeriodChange} />
       </div>
 
       {/* 핵심 지표 */}
@@ -2364,6 +2387,8 @@ export default function AdminPage() {
   const [faqs, setFaqs] = useState<Faq[]>([]);
   const [pageViews, setPageViews] = useState<PageView[]>([]);
   const [pvLoading, setPvLoading] = useState(false);
+  // 유입 관리 기간: 선택값에 따라 서버에서 다시 불러오므로 부모가 들고 있는다
+  const [trafficPeriod, setTrafficPeriod] = useState("today");
   // 기본은 '오늘' — 들어오자마자 오늘 접수분부터 보이도록. 상단 통계 카드는
   // 기간과 무관한 전체 집계라 이 값의 영향을 받지 않는다.
   const [listPeriod, setListPeriod] = useState("today");
@@ -2439,16 +2464,21 @@ export default function AdminPage() {
     if (authed) load();
   }, [authed, load]);
 
-  // 유입 관리 탭 진입 시에만 방문 데이터 로드 (행이 많아 기본 갱신에서 제외)
+  // 유입 관리 탭 진입 시 + 기간 변경 시 방문 데이터 로드
+  // (행이 많아 20초 폴링에서는 제외하고, 이 탭에서만 불러온다)
   useEffect(() => {
     if (!authed || tab !== "traffic") return;
+    const days = PERIODS.find((p) => p.key === trafficPeriod)?.days ?? null;
+    // '방문자 추이' 차트는 기간과 무관하게 최근 14일을 그리므로 최소 14일은 확보한다.
+    // (그러지 않으면 '오늘' 선택 시 하루치만 받아와 차트가 비어 보인다)
+    const q = days == null ? "all" : String(Math.max(days, 14));
     setPvLoading(true);
-    fetch("/api/analytics?days=30")
+    fetch(`/api/analytics?days=${q}`)
       .then((r) => r.json())
       .then((d) => setPageViews(Array.isArray(d) ? d : []))
       .catch(() => {})
       .finally(() => setPvLoading(false));
-  }, [authed, tab]);
+  }, [authed, tab, trafficPeriod]);
 
   // 자동 갱신: 20초 폴링 + 탭 재포커스 시 (조용히 갱신)
   useEffect(() => {
@@ -3235,7 +3265,12 @@ export default function AdminPage() {
 
           {/* 유입 관리 */}
           {tab === "traffic" && (
-            <TrafficView pageViews={pageViews} loading={pvLoading} />
+            <TrafficView
+              pageViews={pageViews}
+              loading={pvLoading}
+              period={trafficPeriod}
+              onPeriodChange={setTrafficPeriod}
+            />
           )}
 
           {/* FAQ 관리 */}

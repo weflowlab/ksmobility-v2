@@ -285,18 +285,20 @@ function toPageView(row: Record<string, unknown>): PageView {
 }
 
 export const pageViewStore = {
-  // 최근 N일 방문 기록 (관리자 통계 집계용)
+  // 최근 N일 방문 기록 (관리자 통계 집계용). days=null 이면 기간 제한 없이 전체.
   // Supabase는 한 응답에 최대 1000행만 주므로 1000행씩 끝까지 이어서 가져온다.
   // (한 번에 받으면 오래된 1000행에서 잘려 최근 방문이 통계에서 사라진다)
-  getRecent: async (days = 30): Promise<PageView[]> => {
-    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  getRecent: async (days: number | null = 30): Promise<PageView[]> => {
+    const since =
+      days == null
+        ? null
+        : new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
     const PAGE = 1000;
     const rows: PageView[] = [];
     for (let from = 0; ; from += PAGE) {
-      const { data, error } = await getSupabase()
-        .from("page_views")
-        .select("*")
-        .gte("created_at", since)
+      let q = getSupabase().from("page_views").select("*");
+      if (since) q = q.gte("created_at", since);
+      const { data, error } = await q
         .order("created_at", { ascending: true })
         .order("id", { ascending: true }) // 동일 시각 행의 페이지 경계 흔들림 방지
         .range(from, from + PAGE - 1);
