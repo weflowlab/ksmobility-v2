@@ -36,14 +36,14 @@ const HERO_SLIDES = [
 
 /* 라인업 — 8개 상품 (사진: /public/lineup) */
 const PRODUCTS = [
-  { name: "Ivory", tag: "K-2 PACKAGE", img: "/lineup/01.jpg" },
-  { name: "Sky Blue", tag: "KSH26-016K2", img: "/lineup/02.jpg" },
-  { name: "Vanilla", tag: "KSH26-026P4", img: "/lineup/03.jpg" },
-  { name: "Beige", tag: "M PACKAGE", img: "/lineup/04.jpg" },
-  { name: "Orange Beige", tag: "K-2 PACKAGE", img: "/lineup/05.jpg" },
-  { name: "Red", tag: "CUSTOM", img: "/lineup/06.jpg" },
-  { name: "Black Ivory", tag: "CUSTOM", img: "/lineup/07.jpg" },
-  { name: "Khaki", tag: "4인승", img: "/lineup/08.jpg" },
+  { name: "K-2 패키지", tag: "IVORY", img: "/lineup/01.jpg" },
+  { name: "K-2 패키지", tag: "SKY BLUE", img: "/lineup/02.jpg" },
+  { name: "S-2 패키지", tag: "VANILLA", img: "/lineup/03.jpg" },
+  { name: "M 패키지", tag: "BEIGE", img: "/lineup/04.jpg" },
+  { name: "K-2 패키지", tag: "ORANGE BEIGE", img: "/lineup/05.jpg" },
+  { name: "B 패키지 (패밀리 패키지)", tag: "RED", img: "/lineup/06.jpg" },
+  { name: "K-2 패키지", tag: "BLACK IVORY", img: "/lineup/07.jpg" },
+  { name: "파티션 모델 퍼스트 패키지", tag: "KHAKI", img: "/lineup/08.jpg" },
 ];
 
 /* 인스타그램 핀 스크롤 시퀀스 (첫 슬라이드 = 인스타그램) */
@@ -674,70 +674,65 @@ export default function HomeClient({
 
         {/* ── 회사/브랜드 소개 ── */}
         {/* ── 회사/브랜드 소개 (풀샷 배경 + 라인 리빌) ── */}
+        {/* ── 상담 폼 (기존 맨 아래였으나 브랜드 무드 섹션과 자리 교체) ── */}
         <section
-          id="about"
-          className="relative flex min-h-screen w-full items-center justify-center overflow-hidden"
+          id="consult"
+          className="relative overflow-hidden border-y border-white/10"
         >
-          {/* 배경: 실내 디테일 무드컷 (어둡게 눌러 텍스트 가독성 확보) */}
-          <Image
-            src="/products/02/016.jpg"
-            alt=""
-            aria-hidden
-            fill
-            quality={90}
-            sizes="100vw"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-black/55" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(0,0,0,0)_0%,rgba(10,10,11,0.75)_70%)]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80" />
+          {/* 배경: 실제 사진 넣기 전 스포트라이트 그라데이션 (사진 준비되면 교체) */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_75%_65%_at_50%_35%,#2a2a31_0%,#141418_50%,#0a0a0b_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(255,255,255,0.05),transparent_45%)]" />
 
           <div
-            data-about
-            className="relative z-10 mx-auto max-w-5xl px-6 text-center"
+            data-reveal-solo
+            className="relative z-10 mx-auto max-w-4xl px-6 py-28"
           >
-            <p className="about-eyebrow mb-6 text-xs tracking-[0.35em] text-zinc-300 sm:text-sm">
-              CARNIVAL SPECIAL VEHICLE · INCHEON
-            </p>
-            <h2 className="text-4xl font-bold leading-[1.18] sm:text-6xl">
-              {["카니발을 특별하게", "특장맨의 손끝에서", "완성됩니다"].map(
-                (line) => (
-                  <span key={line} className="block overflow-hidden pb-1">
-                    <span className="about-line block">{line}</span>
-                  </span>
-                ),
-              )}
-            </h2>
-            <p className="about-sub mt-10 leading-relaxed text-zinc-300">
-              상담부터 인도, 사후관리까지 전 과정을 함께합니다.
-            </p>
+            <div className="mb-12 text-center">
+              <p className="text-xs tracking-[0.35em] text-zinc-400">
+                GET IN TOUCH
+              </p>
+              <h2 className="mt-5 text-4xl font-bold leading-tight sm:text-6xl">
+                특장 카니발이 <br className="sm:hidden" />
+                처음이신가요?
+                <br />
+                무엇이든 <br className="sm:hidden" />
+                편하게 물어보세요!
+              </h2>
+              <p className="mx-auto mt-6 max-w-xl text-zinc-300">
+                카카오톡 · 전화 · 인스타그램, 또는 아래 폼으로 남겨주시면 빠르게
+                안내해 드리겠습니다.
+              </p>
+            </div>
+
+            <div className="mb-10 flex flex-wrap justify-center gap-3 text-sm">
+              <a
+                href={KAKAO}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full bg-[#FEE500] px-6 py-3 font-semibold text-black transition-opacity hover:opacity-90"
+              >
+                카카오톡 오픈채팅
+              </a>
+              <a
+                href={`tel:${PHONE_TEL}`}
+                className="rounded-full border border-white/25 px-6 py-3 font-semibold transition-colors hover:bg-white/10"
+              >
+                전화 상담
+              </a>
+              <a
+                href={INSTA}
+                className="rounded-full border border-white/25 px-6 py-3 font-semibold transition-colors hover:bg-white/10"
+              >
+                인스타그램
+              </a>
+            </div>
+
+            <ContactForm />
           </div>
         </section>
 
-        {/* ── 상담 유도 배너 (라인업 위) ── */}
-        <div className="mx-auto max-w-7xl px-6 pt-24">
-          <div
-            data-reveal-solo
-            className="flex flex-col items-start gap-6 rounded-2xl bg-white px-8 py-8 text-black sm:flex-row sm:items-center sm:justify-between sm:px-10"
-          >
-            <p className="text-sm leading-relaxed sm:text-base">
-              <span className="font-semibold">
-                전문 상담원이 1:1로 안내해 드립니다.
-              </span>{" "}
-              원하시는 사양과 예산에 맞춰, 특장맨이 꼼꼼하게 안내해
-              드리겠습니다.
-            </p>
-            <a
-              href="#consult"
-              className="inline-flex shrink-0 items-center gap-2 rounded-full bg-black px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-zinc-800"
-            >
-              상담 신청 <span aria-hidden>→</span>
-            </a>
-          </div>
-        </div>
-
         {/* ── Lineup — expanding accordion (8 products; hover grows the panel) ── */}
-        <section id="models" className="pb-24 pt-16">
+        <section id="models" className="pt-24 pb-24">
           <div className="mx-auto max-w-7xl px-6">
             <div data-reveal-group className="mb-12">
               <p data-reveal className="text-xs tracking-[0.3em] text-zinc-500">
@@ -757,7 +752,8 @@ export default function HomeClient({
             {PRODUCTS.map((p, i) => (
               <button
                 type="button"
-                key={p.name}
+                // 이름은 패키지명이라 중복된다(K-2 패키지 등). 이미지 경로가 상품별 고유 값.
+                key={p.img}
                 onClick={() => {
                   setGalleryIdx(0);
                   setGallery(i);
@@ -801,7 +797,8 @@ export default function HomeClient({
             {PRODUCTS.map((p, i) => (
               <button
                 type="button"
-                key={p.name}
+                // 이름은 패키지명이라 중복된다(K-2 패키지 등). 이미지 경로가 상품별 고유 값.
+                key={p.img}
                 onClick={() => {
                   setGalleryIdx(0);
                   setGallery(i);
@@ -973,6 +970,28 @@ export default function HomeClient({
           <CraftShorts />
         </section>
 
+        {/* ── 상담 유도 배너 — 라인업·제작 과정을 다 본 뒤 상담으로 연결 ── */}
+        <div className="mx-auto max-w-7xl px-6">
+          <div
+            data-reveal-solo
+            className="flex flex-col items-start gap-6 rounded-2xl bg-white px-8 py-8 text-black sm:flex-row sm:items-center sm:justify-between sm:px-10"
+          >
+            <p className="text-sm leading-relaxed sm:text-base">
+              <span className="font-semibold">
+                전문 상담원이 1:1로 안내해 드립니다.
+              </span>{" "}
+              원하시는 사양과 예산에 맞춰, 특장맨이 꼼꼼하게 안내해
+              드리겠습니다.
+            </p>
+            <a
+              href="#consult"
+              className="inline-flex shrink-0 items-center gap-2 rounded-full bg-black px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-zinc-800"
+            >
+              상담 신청 <span aria-hidden>→</span>
+            </a>
+          </div>
+        </div>
+
         {/* ── 공지사항 / 블로그 (2열) ── */}
         <Section id="notice" eyebrow="NEWS" title="공지사항 · FAQ">
           <div
@@ -1098,59 +1117,44 @@ export default function HomeClient({
         </Section>
 
         {/* ── 문의하기 ── */}
+        {/* ── 브랜드 무드 (히어로 다음이었으나 상담 폼과 자리 교체) ── */}
         <section
-          id="consult"
-          className="relative overflow-hidden border-y border-white/10"
+          id="about"
+          className="relative flex min-h-screen w-full items-center justify-center overflow-hidden"
         >
-          {/* 배경: 실제 사진 넣기 전 스포트라이트 그라데이션 (사진 준비되면 교체) */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_75%_65%_at_50%_35%,#2a2a31_0%,#141418_50%,#0a0a0b_100%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(255,255,255,0.05),transparent_45%)]" />
+          {/* 배경: 실내 디테일 무드컷 (어둡게 눌러 텍스트 가독성 확보) */}
+          <Image
+            src="/products/02/016.jpg"
+            alt=""
+            aria-hidden
+            fill
+            quality={90}
+            sizes="100vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-black/55" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(0,0,0,0)_0%,rgba(10,10,11,0.75)_70%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80" />
 
           <div
-            data-reveal-solo
-            className="relative z-10 mx-auto max-w-4xl px-6 py-28"
+            data-about
+            className="relative z-10 mx-auto max-w-5xl px-6 text-center"
           >
-            <div className="mb-12 text-center">
-              <p className="text-xs tracking-[0.35em] text-zinc-400">
-                GET IN TOUCH
-              </p>
-              <h2 className="mt-5 text-4xl font-bold leading-tight sm:text-6xl">
-                특장 카니발이 <br className="sm:hidden" />
-                처음이신가요?
-                <br />
-                무엇이든 <br className="sm:hidden" />
-                편하게 물어보세요!
-              </h2>
-              <p className="mx-auto mt-6 max-w-xl text-zinc-300">
-                카카오톡 · 전화 · 인스타그램, 또는 아래 폼으로 남겨주시면 빠르게
-                안내해 드리겠습니다.
-              </p>
-            </div>
-
-            <div className="mb-10 flex flex-wrap justify-center gap-3 text-sm">
-              <a
-                href={KAKAO}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-full bg-[#FEE500] px-6 py-3 font-semibold text-black transition-opacity hover:opacity-90"
-              >
-                카카오톡 오픈채팅
-              </a>
-              <a
-                href={`tel:${PHONE_TEL}`}
-                className="rounded-full border border-white/25 px-6 py-3 font-semibold transition-colors hover:bg-white/10"
-              >
-                전화 상담
-              </a>
-              <a
-                href={INSTA}
-                className="rounded-full border border-white/25 px-6 py-3 font-semibold transition-colors hover:bg-white/10"
-              >
-                인스타그램
-              </a>
-            </div>
-
-            <ContactForm />
+            <p className="about-eyebrow mb-6 text-xs tracking-[0.35em] text-zinc-300 sm:text-sm">
+              CARNIVAL SPECIAL VEHICLE · INCHEON
+            </p>
+            <h2 className="text-4xl font-bold leading-[1.18] sm:text-6xl">
+              {["카니발을 특별하게", "특장맨의 손끝에서", "완성됩니다"].map(
+                (line) => (
+                  <span key={line} className="block overflow-hidden pb-1">
+                    <span className="about-line block">{line}</span>
+                  </span>
+                ),
+              )}
+            </h2>
+            <p className="about-sub mt-10 leading-relaxed text-zinc-300">
+              상담부터 인도, 사후관리까지 전 과정을 함께합니다.
+            </p>
           </div>
         </section>
       </main>
@@ -1376,7 +1380,7 @@ function ContactForm() {
         value={name}
         onChange={(e) => setName(e.target.value)}
         disabled={sending}
-        className="rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm outline-none placeholder:text-zinc-500 focus:border-white/40 disabled:opacity-50"
+        className="rounded-xl border border-white/15 bg-black/30 px-4 py-3.5 text-base outline-none placeholder:font-semibold placeholder:text-white focus:border-white/40 disabled:opacity-50"
       />
       <input
         required
@@ -1386,7 +1390,7 @@ function ContactForm() {
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
         disabled={sending}
-        className="rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm outline-none placeholder:text-zinc-500 focus:border-white/40 disabled:opacity-50"
+        className="rounded-xl border border-white/15 bg-black/30 px-4 py-3.5 text-base outline-none placeholder:font-semibold placeholder:text-white focus:border-white/40 disabled:opacity-50"
       />
       <textarea
         placeholder="문의 내용"
@@ -1394,25 +1398,25 @@ function ContactForm() {
         value={note}
         onChange={(e) => setNote(e.target.value)}
         disabled={sending}
-        className="rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm outline-none placeholder:text-zinc-500 focus:border-white/40 disabled:opacity-50 sm:col-span-2"
+        className="rounded-xl border border-white/15 bg-black/30 px-4 py-3.5 text-base outline-none placeholder:font-semibold placeholder:text-white focus:border-white/40 disabled:opacity-50 sm:col-span-2"
       />
       {/* 개인정보 수집·이용 동의 — 이름·연락처를 받으므로 필수 (개인정보보호법 제15조) */}
       <div className="sm:col-span-2">
-        <label className="flex cursor-pointer items-start gap-2.5 text-sm text-zinc-300">
+        <label className="flex cursor-pointer items-start gap-2.5 text-base font-semibold text-white">
           <input
             type="checkbox"
             required
             checked={agree}
             onChange={(e) => setAgree(e.target.checked)}
             disabled={sending}
-            className="mt-0.5 h-4 w-4 shrink-0 accent-white"
+            className="mt-1 h-[1.125rem] w-[1.125rem] shrink-0 accent-white"
           />
           <span>
-            <span className="font-semibold text-white">[필수]</span> 개인정보
+            <span className="font-bold text-white">[필수]</span> 개인정보
             수집·이용에 동의합니다.
           </span>
         </label>
-        <p className="mt-2 pl-[1.625rem] text-xs leading-relaxed text-zinc-500">
+        <p className="mt-2.5 pl-[1.75rem] text-sm font-medium leading-relaxed text-zinc-200">
           · 수집 항목: 이름, 연락처, 문의 내용
           <br />· 이용 목적: 상담 문의 접수 및 안내
           <br />· 보유 기간: 상담 완료 후 1년
@@ -1427,7 +1431,7 @@ function ContactForm() {
       <button
         type="submit"
         disabled={sending || !agree}
-        className="mt-6 rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-black transition-colors hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-40 sm:col-span-2"
+        className="mt-6 rounded-full bg-white px-8 py-4 text-base font-bold text-black transition-colors hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-40 sm:col-span-2"
       >
         {sending ? "접수 중…" : "문의 남기기"}
       </button>
