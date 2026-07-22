@@ -35,16 +35,22 @@ const HERO_SLIDES = [
 ];
 
 /* 라인업 — 8개 상품 (사진: /public/lineup) */
+// dir = /public/products 의 폴더 번호. 진열 순서와 사진 폴더를 분리해 두어야
+// 순서를 바꿔도 카드와 갤러리가 어긋나지 않는다. (배열 위치로 갤러리를 찾으면
+// 순서 변경 시 다른 상품 사진이 열린다)
+// M 패키지(dir 4)는 고객 요청으로 라인업에서 제외 — 사진은 그대로 보관.
 const PRODUCTS = [
-  { name: "K-2 패키지", tag: "IVORY", img: "/lineup/01.jpg" },
-  { name: "K-2 패키지", tag: "SKY BLUE", img: "/lineup/02.jpg" },
-  { name: "S-2 패키지", tag: "VANILLA", img: "/lineup/03.jpg" },
-  { name: "M 패키지", tag: "BEIGE", img: "/lineup/04.jpg" },
-  { name: "K-2 패키지", tag: "ORANGE BEIGE", img: "/lineup/05.jpg" },
-  { name: "B 패키지 (패밀리 패키지)", tag: "RED", img: "/lineup/06.jpg" },
-  { name: "K-2 패키지", tag: "BLACK IVORY", img: "/lineup/07.jpg" },
-  { name: "파티션 모델 퍼스트 패키지", tag: "KHAKI", img: "/lineup/08.jpg" },
+  { dir: 1, name: "K-2 패키지", tag: "IVORY", img: "/lineup/01.jpg" },
+  { dir: 2, name: "K-2 패키지", tag: "SKY BLUE", img: "/lineup/02.jpg" },
+  { dir: 5, name: "K-2 패키지", tag: "ORANGE BEIGE", img: "/lineup/05.jpg" },
+  { dir: 7, name: "K-2 패키지", tag: "BLACK IVORY", img: "/lineup/07.jpg" },
+  { dir: 6, name: "B 패키지 (패밀리 패키지)", tag: "RED", img: "/lineup/06.jpg" },
+  { dir: 3, name: "S-2 패키지", tag: "VANILLA", img: "/lineup/03.jpg" },
+  { dir: 8, name: "파티션 모델 퍼스트 패키지", tag: "KHAKI", img: "/lineup/08.jpg" },
 ];
+
+// 상품이 실제로 쓰는 갤러리 사진 목록 (GALLERY 는 폴더 번호 순서로 생성된 배열)
+const galleryOf = (i: number): string[] => GALLERY[PRODUCTS[i].dir - 1] ?? [];
 
 /* 인스타그램 핀 스크롤 시퀀스 (첫 슬라이드 = 인스타그램) */
 const SEQ: {
@@ -134,7 +140,7 @@ export default function HomeClient({
   // Product gallery keyboard nav: Esc closes, ←/→ navigate.
   useEffect(() => {
     if (gallery === null) return;
-    const len = GALLERY[gallery]?.length ?? 0;
+    const len = galleryOf(gallery).length;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setGallery(null);
       else if (e.key === "ArrowLeft")
@@ -485,7 +491,7 @@ export default function HomeClient({
                 <h3 className="mt-0.5 text-lg font-semibold">
                   {PRODUCTS[gallery].name}
                   <span className="ml-2 text-sm font-normal text-zinc-500">
-                    {galleryIdx + 1} / {GALLERY[gallery]?.length ?? 0}
+                    {galleryIdx + 1} / {galleryOf(gallery).length}
                   </span>
                 </h3>
               </div>
@@ -505,8 +511,8 @@ export default function HomeClient({
                 onClick={() =>
                   setGalleryIdx(
                     (n) =>
-                      (n - 1 + (GALLERY[gallery]?.length ?? 1)) %
-                      (GALLERY[gallery]?.length ?? 1),
+                      (n - 1 + (galleryOf(gallery).length || 1)) %
+                      (galleryOf(gallery).length || 1),
                   )
                 }
                 aria-label="이전"
@@ -518,7 +524,7 @@ export default function HomeClient({
               <div className="relative h-full w-full max-w-5xl">
                 <Image
                   src={
-                    (GALLERY[gallery] ?? [])[galleryIdx] ??
+                    galleryOf(gallery)[galleryIdx] ??
                     PRODUCTS[gallery].img
                   }
                   alt={`${PRODUCTS[gallery].name} ${galleryIdx + 1}`}
@@ -533,7 +539,7 @@ export default function HomeClient({
                 type="button"
                 onClick={() =>
                   setGalleryIdx(
-                    (n) => (n + 1) % (GALLERY[gallery]?.length ?? 1),
+                    (n) => (n + 1) % (galleryOf(gallery).length || 1),
                   )
                 }
                 aria-label="다음"
@@ -549,7 +555,7 @@ export default function HomeClient({
               className="no-scrollbar shrink-0 overflow-x-auto border-t border-white/10 px-4 py-3"
             >
               <div className="mx-auto flex w-max gap-2">
-                {(GALLERY[gallery] ?? []).map((src, idx) => (
+                {galleryOf(gallery).map((src, idx) => (
                   <button
                     type="button"
                     key={src}
