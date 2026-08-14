@@ -770,7 +770,6 @@ export default function HomeClient({
                   src={p.img}
                   alt={p.name}
                   fill
-                  quality={90}
                   sizes="50vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
@@ -815,7 +814,6 @@ export default function HomeClient({
                   src={p.img}
                   alt={p.name}
                   fill
-                  quality={90}
                   sizes="50vw"
                   className="object-cover"
                 />
@@ -1134,7 +1132,6 @@ export default function HomeClient({
             alt=""
             aria-hidden
             fill
-            quality={90}
             sizes="100vw"
             className="object-cover"
           />
@@ -1168,7 +1165,7 @@ export default function HomeClient({
       {/* ── Footer ── */}
       <footer className="border-t border-white/10 bg-[#0a0a0b] px-6 py-16">
         <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-col gap-10 lg:flex-row lg:items-stretch lg:justify-between">
             {/* left: brand + business info */}
             <div>
               <div className="text-lg font-semibold tracking-[0.15em]">
@@ -1194,7 +1191,9 @@ export default function HomeClient({
               </div>
             </div>
 
-            {/* right: social icons */}
+            {/* right: social icons(위) + 제작사 크레딧(아래).
+                lg 에서 오른쪽 정렬 + 세로로 벌려 버튼 바닥을 왼쪽 사업자정보와 맞춘다 */}
+            <div className="flex flex-col items-start gap-6 lg:items-end lg:justify-between">
             <div className="flex items-center gap-3">
               <a
                 href={INSTA}
@@ -1277,6 +1276,32 @@ export default function HomeClient({
                   <path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.3 21 3 13.7 3 4c0-.6.4-1 1-1h3.4c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.3 1L6.6 10.8z" />
                 </svg>
               </a>
+            </div>
+
+            {/* 홈페이지 제작사 크레딧 — 아웃라인만, 호버 시 흰 배경으로 채움 */}
+            <a
+              href="https://weflowlab.kr/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-2.5 rounded-full border border-white/25 px-5 py-2.5 text-zinc-300 transition-colors hover:border-white hover:bg-white hover:text-black lg:mb-[30px]"
+            >
+              <span className="text-sm">홈페이지 제작</span>
+              <span className="text-sm font-bold tracking-[0.14em]">WEFLOW</span>
+              <svg
+                viewBox="0 0 24 24"
+                className="h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <path d="M15 3h6v6" />
+                <path d="M10 14L21 3" />
+              </svg>
+            </a>
             </div>
           </div>
 
