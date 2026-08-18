@@ -28,7 +28,7 @@ async function getNotices(): Promise<NoticeView[]> {
       body: n.body,
     }));
   } catch {
-    // Supabase 미설정·장애 — 사이트에서 섹션이 통째로 사라지지 않도록 기본값 유지
+    // DB 미설정·장애 — 사이트에서 섹션이 통째로 사라지지 않도록 기본값 유지
     return DEFAULT_NOTICES;
   }
 }
